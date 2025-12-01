@@ -6,7 +6,7 @@ The features it implements are:
 - Recording grades for bith core and elective subjects
 - Viewing grade reports
 - Menu navigation
-- 
+
 The console application demonstrates these OOP principles: 
 - Abstract classes
 - Inheritance

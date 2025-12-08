@@ -1,6 +1,7 @@
-import java.util.ArrayList;
+import java.util.ArrayList;// used to import Java's ArrayList class to store lists of grades
 
-public abstract class Student {
+public abstract class Student { // Student class is abstract because it cannot be instantiated and is used as the parent class
+    //all the fields are private so that they can be modified and accessed only within this abstract class
     private String studentId;
     private String studentName;
     private String studentEmail;
@@ -13,7 +14,7 @@ public abstract class Student {
 
     protected ArrayList<Double> grades = new ArrayList<>(); // this list is for storing the grades of a student
 
-    private static int studentCounter = 1; // I used this static counter to generate the unique student IDs
+    private static int studentCounter = 1; //  static counter to generate the unique student IDs
 
     // Constructor
     public Student(String studentName, String studentEmail, String studentPhone, int studentAge) {

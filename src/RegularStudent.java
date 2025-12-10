@@ -1,28 +1,48 @@
-public class RegularStudent extends Student {
-    private final double passingGrade = 50.0; // this is the passing grade for regular students
+public class RegularStudent extends Student {//a subclass of the Student class which represents a regular student with standard (50) grading requirements
+    private final double passingGrade; // this is the passing grade for regular students(50%)
 
-    //my Constructor
+    //This constructor calls the parent constructor(from the Student class) using the keyword "super"
     public RegularStudent(String studentName, String studentEmail, String studentPhone, int studentAge) {
-        super (studentName, studentEmail, studentPhone, studentAge);
+        super (studentName, studentEmail, studentPhone, studentAge);// initializing parent class fields
+        this.passingGrade = 50.0;// passing grade is set to 50.0
     }
 
-    //display student details
+    //overriding abstract methods from the Student class
+
     @Override
-    public void displayStudentDetails() {
+    public void displayStudentDetails() { // displays all the students details
         System.out.println("ID: " + getStudentId());
         System.out.println("Name: " + getStudentName());
-        System.out.println("Type: Regular");
+        System.out.println("Type: " + getStudentType());
+        System.out.println("Age: " + getStudentAge());
+        System.out.println("Email: " + getStudentEmail());
         System.out.println("Average Grade: " + calculateAverageGrade());
         System.out.println("Passing Grade: " + getPassingGrade());
-        System.out.println("Status: " + (isPassing() ? "Pass" : "Fail"));
+        System.out.println("Status: " + getStudentStatus());
     }
+
     @Override
-    public String getStudentType(){
+    public String getStudentType(){// to get the type of student
         return "Regular";
     }
     @Override
-    public double getPassingGrade() {
+    public double getPassingGrade() { //returns 50.0 as the passing grade for a regular student
         return passingGrade;
+    }
+
+    //calculating the average grade from the GradeManager
+    @Override
+    public double calculateAverageGrade(){
+        if (gradeManager == null){//checking if gradeManager reference exists
+            return 0.0;// no grade manager available
+        }
+        return gradeManager.calculateOverallAverage(getStudentId()); // using the GradeManager to calculate overall average
+    }
+
+    @Override
+    public boolean isPassing(){//checking if student is passing based on passing grade
+        double average = calculateAverageGrade();
+        return average >= passingGrade; //true if average >=50%
     }
 
 

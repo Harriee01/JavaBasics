@@ -1,5 +1,3 @@
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Scanner;// allows user input
 import java.time.LocalDate;
 
@@ -229,18 +227,127 @@ public class Main {// the entry point of the application
                 // 4.View grade report
 
                 case "4":
-                    System.out.print("Enter Student ID: ");
-                    String id = scanner.nextLine();
+                    System.out.print("Enter Student ID: ");//gets the student ID from the user
+                    String reportStudentId = scanner.nextLine();
 
-                    Student found = studentManager.findStudent(id);
+                    Student foundStudent = studentManager.findStudent(reportStudentId);//finding the student
 
-                    if (found == null) {
+                    if (foundStudent == null) {// checking if the student exists
                         System.out.println("Student not found.");
+                        System.out.print("Press Enter to continue...");
+                        scanner.nextLine();
                         break;
                     }
 
-                    gradeManager.viewGradesByStudent(id);
+                    // displaying student header information
+                    System.out.println();
+                    System.out.println("Student: " + reportStudentId + " - " + foundStudent.getStudentName());
+                    System.out.println("Type: " + foundStudent.getStudentType() + " Student");
+
+                    // calculating current average
+                    double currentAvg = gradeManager.calculateOverallAverage(reportStudentId);
+                    System.out.println("Current Average: " + String.format("%.1f%%", currentAvg));
+
+                    // determining and displaying passing status
+                    String passingStatus;
+                    if (currentAvg == 0) {
+                        passingStatus = "No grades recorded";
+                    } else if (foundStudent.isPassing()) {
+                        passingStatus = "PASSING ✓";
+                    } else {
+                        passingStatus = "FAILING ✗";
+                    }
+                    System.out.println("Status: " + passingStatus);
+                    System.out.println();
+
+                    // getting all grades for a particular student
+                    Grade[] studentGrades = gradeManager.viewGradesByStudent(reportStudentId);
+
+                    // checking if the student has any grades
+                    if (studentGrades.length == 0) {
+                        System.out.println("No grades recorded for this student.");
+                        System.out.println("───────────────────────────────────────────────────");
+                        System.out.println();
+                        System.out.print("Press Enter to continue...");
+                        scanner.nextLine();
+                        break;
+                    }
+
+                    // displaying grade history in table format
+                    System.out.println("GRADE HISTORY");
+                    System.out.println("───────────────────────────────────────────────────────────────────────────────");
+                    System.out.printf("%-10s | %-12s | %-20s | %-10s | %-10s%n",
+                            "GRD ID", "DATE", "SUBJECT", "TYPE", "GRADE");
+                    System.out.println("───────────────────────────────────────────────────────────────────────────────");
+
+                    // looping through grades in reverse order (newest first)
+                    for (int i = studentGrades.length - 1; i >= 0; i--) {
+                        Grade newgrade = studentGrades[i];
+                        System.out.printf("%-10s | %-12s | %-20s | %-10s | %-10.1f%%%n",
+                                newgrade.getGradeId(),
+                                newgrade.getDate(),
+                                newgrade.getSubject().getSubjectName(),
+                                newgrade.getSubject().getSubjectType(),
+                                newgrade.getGrade());
+                    }
+                    System.out.println("───────────────────────────────────────────────────────────────────────────────");
+
+                    // calculating and displaying averages by category
+                    System.out.println();
+                    System.out.println("Total Grades: " + studentGrades.length);
+
+                    // calculating core subjects average
+                    double coreAvg = gradeManager.calculateCoreAverage(reportStudentId);
+                    System.out.println("Core Subjects Average: " + String.format("%.1f%%", coreAvg));
+
+                    // calculating elective subjects average
+                    double electiveAvg = gradeManager.calculateElectiveAverage(reportStudentId);
+                    System.out.println("Elective Subjects Average: " + String.format("%.1f%%", electiveAvg));
+
+                    // displaying overall average
+                    System.out.println("Overall Average: " + String.format("%.1f%%", currentAvg));
+                    System.out.println();
+
+                    // displaying performance summary
+                    System.out.println("Performance Summary:");
+
+                    // checking if the student is passing all core subjects
+                    if (coreAvg >= foundStudent.getPassingGrade()) {
+                        System.out.println("Passing all core subjects");
+                    } else if (coreAvg > 0) {
+                        System.out.println("Not passing core subjects (need " +
+                                foundStudent.getPassingGrade() + "%)");
+                    }
+
+                    // checking the overall passing status
+                    if (currentAvg >= foundStudent.getPassingGrade()) {
+                        System.out.println("Meeting passing grade requirement (" +
+                                foundStudent.getPassingGrade() + "%)");
+                    } else if (currentAvg > 0) {
+                        System.out.println("Below passing grade requirement (" +
+                                foundStudent.getPassingGrade() + "%)");
+                    }
+
+                    // for honors students, this checks honors eligibility
+                    if (foundStudent instanceof HonorsStudent) {
+                        HonorsStudent honorsStudent01 = (HonorsStudent) foundStudent;
+                        // updating honors eligibility
+                        honorsStudent01.checkHonorsEligibility();
+                        if (honorsStudent01.isHonorsEligible()) {
+                            System.out.println("Eligible for honors recognition (85%+)");
+                        } else if (currentAvg > 0) {
+                            System.out.println("Not eligible for honors (need 85%+)");
+                        }
+                    }
+
+                    System.out.println();
+                    System.out.print("Press Enter to continue...");
+                    scanner.nextLine();
                     break;
+
+
+//                gradeManager.viewGradesByStudent(reportStudentId);
+//                    break;
 
 
                 // 5. exit system

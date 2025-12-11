@@ -253,9 +253,9 @@ public class Main {// the entry point of the application
                     if (currentAvg == 0) {
                         passingStatus = "No grades recorded";
                     } else if (foundStudent.isPassing()) {
-                        passingStatus = "PASSING ✓";
+                        passingStatus = "PASSING ";
                     } else {
-                        passingStatus = "FAILING ✗";
+                        passingStatus = "FAILING ";
                     }
                     System.out.println("Status: " + passingStatus);
                     System.out.println();

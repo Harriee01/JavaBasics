@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;// allows user input
 import java.time.LocalDate;
 
@@ -12,7 +14,7 @@ public class Main {// the entry point of the application
         GradeManager gradeManager = new GradeManager();//new grade manager object to manage student grades
         studentManager.setGradeManager(gradeManager);//connects both student and grade managers so that they can work together
 
-        //creating arrays of available students;both core and elective
+        //creating arrays of available subjects;both core and elective
         CoreSubject[] coreSubjects = {
                 new CoreSubject("Mathematics", "MATH101"),
                 new CoreSubject("English", "ENG102"),
@@ -65,28 +67,28 @@ public class Main {// the entry point of the application
                     int type = Integer.parseInt(scanner.nextLine());
 
                     //creating the suitable student type based on the choice of the user
-                    Student student;
+                    Student newstudent;
                     if (type == 1) {
-                        student = new RegularStudent(name, email, phone, age);
+                        newstudent = new RegularStudent(name, email, phone, age);
                     } else if (type == 2) {
-                        student = new HonorsStudent(name, email, phone, age);
+                        newstudent = new HonorsStudent(name, email, phone, age);
                     } else {
                         System.out.println("Invalid type selected.");
                         break;
                     }
                     //adding student to manager
-                    studentManager.addStudent(student);
+                    studentManager.addStudent(newstudent);
 
                     //Display confirmation
                     System.out.println("Student registered successfully!");
                     System.out.println("========================================");
-                    System.out.println("Student ID     : " + student.getStudentId());
-                    System.out.println("Name           : " + student.getStudentName());
-                    System.out.println("Age            : " + student.getStudentAge());
-                    System.out.println("Email          : " + student.getStudentEmail());
-                    System.out.println("Phone          : " + student.getStudentPhone());
-                    System.out.println("Type           : " + student.getStudentType());
-                    System.out.println("Status         : " + student.getStudentStatus());
+                    System.out.println("Student ID     : " + newstudent.getStudentId());
+                    System.out.println("Name           : " + newstudent.getStudentName());
+                    System.out.println("Age            : " + newstudent.getStudentAge());
+                    System.out.println("Email          : " + newstudent.getStudentEmail());
+                    System.out.println("Phone          : " + newstudent.getStudentPhone());
+                    System.out.println("Type           : " + newstudent.getStudentType());
+                    System.out.println("Status         : " + newstudent.getStudentStatus());
                     System.out.println();
                     System.out.println("Press Enter to continue...");
                     scanner.nextLine();
@@ -144,22 +146,6 @@ public class Main {// the entry point of the application
 
                     // Core subjects
                     if (subjectType == 1) {
-
-//                        System.out.println("Core Subjects:");
-//                        System.out.println("1. Mathematics");
-//                        System.out.println("2. English");
-//                        System.out.println("3. Science");
-
-                       // int corePick = Integer.parseInt(scanner.nextLine());
-
-//                        if (corePick == 1) subject = new CoreSubject("Mathematics", "C101");
-//                        else if (corePick == 2) subject = new CoreSubject("Science", "C102");
-//                        else if (corePick == 3) subject = new CoreSubject("English", "C103");
-//                        else {
-//                            System.out.println("Invalid core subject.");
-//                            break;
-//                        }
-
                         //show available core subjects
                         for (int i = 0; i < coreSubjects.length; i++) {
                             System.out.println((i + 1) + ". " + coreSubjects[i].getSubjectName());
@@ -187,49 +173,22 @@ public class Main {// the entry point of the application
                         selectedSubject = electiveSubjects[subjectChoice - 1];
                     }
 
-//                    // Get grade value from user
+//                    // getting  grade value from user
                     System.out.println();
                     System.out.print("Enter grade (0-100): ");
                     double gradeValue = scanner.nextDouble();
-                    scanner.nextLine();  // Consume newline
+                    scanner.nextLine();
+
+                    // Validate the grade using the student's validateGrade method
+                    if (!student.validateGrade(gradeValue)) {
+                        System.out.println("Error: Invalid grade. Grade must be between 0 and 100.");
+                        System.out.print("Press Enter to continue...");
+                        scanner.nextLine();
+                        break;
+                    }
 
 
 
-
-//                    (subjectType == 2) {
-//                        System.out.println("Elective Subjects:");
-//                        System.out.println("1. Music");
-//                        System.out.println("2. Art");
-//                        System.out.println("3. Physical Education");
-//
-//                        int electivePick = Integer.parseInt(scanner.nextLine());
-//
-//                        if (electivePick == 1) subject = new ElectiveSubject("Music", "E201");
-//                        else if (electivePick == 2) subject = new ElectiveSubject("Art", "E202");
-//                        else if (electivePick == 3) subject = new ElectiveSubject("Physical Education", "E203");
-//                        else {
-//                            System.out.println("Invalid elective subject.");
-//                            break;
-//                        }
-//
-//                    } else {
-//                        System.out.println("Invalid subject type.");
-//                        break;
-//                    }
-
-//                    System.out.print("Enter grade (0–100): ");
-//                    double gradeValue = Double.parseDouble(scanner.nextLine());
-//
-//                    if (gradeValue < 0 || gradeValue > 100) {
-//                        System.out.println("Invalid grade. Must be between 0 and 100.");
-//                        break;
-//                    }
-//
-//                    Grade newGrade = new Grade(studentId, subject, gradeValue);
-//                    gradeManager.addGrade(newGrade);
-//
-//                    System.out.println("Grade recorded successfully!");
-//                    break;
 
 
                     // Display grade confirmation before recording
@@ -242,7 +201,7 @@ public class Main {// the entry point of the application
                     System.out.println("Subject: " + selectedSubject.getSubjectName() + " (" + selectedSubject.getSubjectType() + ")");
                     System.out.println("Grade: " + gradeValue + "%");
                     // get current date
-                    String currentDate = new java.text.SimpleDateFormat("MM-dd-yyyy").format(new java.util.Date());
+                    String currentDate = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
                     System.out.println("Date: " + currentDate);
                     System.out.println("───────────────────────────────────────────────────");
                     System.out.println();

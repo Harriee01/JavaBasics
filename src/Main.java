@@ -118,6 +118,8 @@ public class Main {// the entry point of the application
                     String studentId = scanner.nextLine();
 
                     Student student1 = studentManager.findStudent(studentId);//this finds the student using StudentManager
+                    LocalDate currentDate = LocalDate.now();
+
 
                     if (student1 == null) {//checking if the student exists
                         System.out.println("Student not found.");
@@ -179,19 +181,15 @@ public class Main {// the entry point of the application
                     double gradeValue = scanner.nextDouble();
                     scanner.nextLine();
 
-                    // Validate the grade using the student's validateGrade method
-                    if (!student.validateGrade(gradeValue)) {
+                    // validating the grade using the student's validateGrade method
+                    if (!student1.validateGrade(gradeValue)) {
                         System.out.println("Error: Invalid grade. Grade must be between 0 and 100.");
                         System.out.print("Press Enter to continue...");
                         scanner.nextLine();
                         break;
                     }
 
-
-
-
-
-                    // Display grade confirmation before recording
+                    // displays grade confirmation before recording
                     System.out.println();
                     System.out.println("GRADE CONFIRMATION");
                     System.out.println("───────────────────────────────────────────────────");
@@ -200,11 +198,32 @@ public class Main {// the entry point of the application
                     System.out.println("Student: " + studentId + " - " + student1.getStudentName());
                     System.out.println("Subject: " + selectedSubject.getSubjectName() + " (" + selectedSubject.getSubjectType() + ")");
                     System.out.println("Grade: " + gradeValue + "%");
-                    // get current date
-                    String currentDate = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
-                    System.out.println("Date: " + currentDate);
+
+//                    String currentDate = new SimpleDateFormat("MM-dd-yyyy").format(new Date());
+                    System.out.println("Date: " + currentDate);// gets the current date
                     System.out.println("───────────────────────────────────────────────────");
                     System.out.println();
+
+                    // asking for confirmation
+                    System.out.print("Confirm grade? (Y/N): ");
+                    String confirmation = scanner.nextLine();
+
+                    // checking if the user confirmed
+                    if (confirmation.equalsIgnoreCase("Y")) {
+                        // Create a new Grade object
+                        Grade newGrade = new Grade(studentId, selectedSubject, gradeValue);
+                        // Add the grade to GradeManager
+                        gradeManager.addGrade(newGrade);
+                        System.out.println();
+                        System.out.println("✓ Grade recorded successfully!");
+                    } else {
+                        System.out.println();
+                        System.out.println("Grade recording cancelled.");
+                    }
+                    System.out.println();
+                    System.out.print("Press Enter to continue...");
+                    scanner.nextLine();
+                    break;
 
 
                 // 4.View grade report

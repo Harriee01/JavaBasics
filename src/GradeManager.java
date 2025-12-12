@@ -13,28 +13,6 @@ public void addGrade(Grade grade) {
     }
 }
 
-// Method to display all grades for a specific student
-//    public void viewGradesByStudent(String studentId) {
-//        if (gradeCount == 0) {
-//            System.out.println("No grades recorded yet.");
-//            return;
-//        }
-//        System.out.println("\n=== Grade Report for Student ID: " + studentId + " ===");
-//        boolean foundAny = false;
-//        // Print grades in reverse order (newest first)
-//        for (int i = gradeCount - 1; i >= 0; i--) {
-//            Grade grade = grades[i];
-//            if (grade != null && grade.getStudentId().equals(studentId)) {
-//                foundAny = true;
-//                System.out.println("--------------------------------------");
-//                grade.displayGradeDetails();
-//            }
-//        }
-//        if (!foundAny) {
-//            System.out.println("No grades found for this student.");
-//            return;
-//        }
-
 //method to get all grades for a specific student
 public Grade[] viewGradesByStudent(String studentId) {
     int count = 0;//counting how many grades a particular student has
@@ -126,6 +104,15 @@ public double calculateOverallAverage(String studentId) {
     // this method gets the  total number of grades
     public int getGradeCount() {
         return gradeCount;
+    }
+
+    // this method gets all grades (for statistics)
+    public Grade[] getAllGrades() {
+        Grade[] allGrades = new Grade[gradeCount];
+        for (int i = 0; i < gradeCount; i++) {
+            allGrades[i] = grades[i];
+        }
+        return allGrades;
     }
 
 }

@@ -115,6 +115,27 @@ public double calculateOverallAverage(String studentId) {
         return allGrades;
     }
 
+    //this method gets grades of students by subject name
+    public Grade[] getGradesBySubject(String subjectName) {
+        int count = 0;
+        for (int i = 0; i < gradeCount; i++) {
+            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
+                count++;
+            }
+        }
+
+        Grade[] subjectGrades = new Grade[count];
+        int index = 0;
+
+        for (int i = 0; i < gradeCount; i++) {
+            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
+                subjectGrades[index++] = grades[i];
+            }
+        }
+
+        return subjectGrades;
+    }
+
 }
 
 

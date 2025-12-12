@@ -415,11 +415,11 @@ public class Main {// the entry point of the application
 //                 default:
 //                     System.out.println("Invalid choice. Try again.");
 //             }
-         } catch (StudentNotFoundException e) {
+         } catch (StudentNotFoundException exception) {
              // CATCH specific exception for student not found
              System.out.println();
-             System.out.println("✗ ERROR: " + e.getClass().getSimpleName());
-             System.out.println("  " + e.getMessage());
+             System.out.println("✗ ERROR: " + exception.getClass().getSimpleName());
+             System.out.println("  " + exception.getMessage());
              System.out.println();
 
              // Show available student IDs to help user
@@ -445,6 +445,17 @@ public class Main {// the entry point of the application
                  System.out.print("Try again? (Y/N): ");
                  scanner.nextLine();
              }
+             catch (Exception e) {
+                 // CATCH any other unexpected exceptions
+                 System.out.println();
+                 System.out.println("✗ An unexpected error occurred:");
+                 System.out.println("  " + e.getMessage());
+                 System.out.println();
+                 System.out.print("Press Enter to continue...");
+                 scanner.nextLine();
+             }
+
+
 
             scanner.close();
         }

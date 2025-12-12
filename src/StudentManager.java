@@ -39,7 +39,7 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return null;// not found so it returns null
     }
 
-    // searching students by name (partial match)
+    // this method searches students by name (partial match)
     // returns array of matching students
     public Student[] searchByName(String name) {
         // first count matches
@@ -63,6 +63,29 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
         return matches;
     }
+
+
+    //this method searches students by type (Regular or Honors)
+    public Student[] searchByType(String type) {
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesType(type)) {
+                matchCount++;
+            }
+        }
+
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesType(type)) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
 
     // this method displays all students
     public void viewAllStudents() {

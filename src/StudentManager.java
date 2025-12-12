@@ -86,6 +86,30 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return matches;
     }
 
+    // this method searches students by grade range
+    // for instance minGrade=80, maxGrade=90 finds students with 80-90% average
+    public Student[] searchByGradeRange(double minGrade, double maxGrade) {
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            double avg = students[i].calculateAverageGrade();
+            if (avg >= minGrade && avg <= maxGrade) {
+                matchCount++;
+            }
+        }
+
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        for (int i = 0; i < studentCount; i++) {
+            double avg = students[i].calculateAverageGrade();
+            if (avg >= minGrade && avg <= maxGrade) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
 
     // this method displays all students
     public void viewAllStudents() {

@@ -29,7 +29,7 @@ public class Main {// the entry point of the application
         boolean running = true; //keeps the menu running until the user exits
 
         while (running) {//continues running until user chooses to exit
-            //displays menu
+            //displays updated menu
             System.out.println("\n=========================================");
             System.out.println("      STUDENT GRADE MANAGEMENT SYSTEM     ");
             System.out.println("=========================================");
@@ -37,7 +37,12 @@ public class Main {// the entry point of the application
             System.out.println("2. View All Students");
             System.out.println("3. Record Grade");
             System.out.println("4. View Grade Report");
-            System.out.println("5. Exit");
+            System.out.println("5. Export Grade Report           [NEW]");
+            System.out.println("6. Calculate Student GPA         [NEW]");
+            System.out.println("7. Bulk Import Grades            [NEW]");
+            System.out.println("8. View Class Statistics         [NEW]");
+            System.out.println("9. Search Students               [NEW]");
+            System.out.println("10. Exit");
             System.out.print("Enter choice: ");
 
             String choice = scanner.nextLine();//user's choice

@@ -1,8 +1,9 @@
 import java.util.ArrayList;// used to import Java's ArrayList class to store lists of grades
 
-public abstract class Student implements Gradable { // Student class is abstract because it cannot be instantiated and is used as the parent class for all student types
+public abstract class Student implements Gradable, Exportable, Searchable, Calculable { // Student class is abstract because it cannot be instantiated and is used as the parent class for all student types
     //all the fields are private so that they can be modified and accessed only within this abstract class
     // it also implements the Gradable interface and provides (a must) for the methods stated in the interface
+    // now it also implements multiple interfaces,that is exportable, searchable and calculable
 
     private String studentId; //unique student ID
     private String studentName; // Student's full name
@@ -65,21 +66,33 @@ public abstract class Student implements Gradable { // Student class is abstract
         }
         return false;
     }
+    // implementing the Searchable interface - this allows searching students
+    @Override
+    public boolean matchesId(String id) {
+        // exact match for ID (case-insensitive)
+        return this.studentId.equalsIgnoreCase(id);
+    }
 
-    //public void addGrade(double grade) { //adds a grade to the student record
-//        grades.add(grade);  // stores the grades
-//        totalGrades += grade; //updates total
-//        gradeCount++; //increases grade count
-//    }
-//
-//    public double calculateAverageGrade() { // this method calculates the average grade
-//        if(gradeCount == 0) return 0.0;
-//        return totalGrades / gradeCount;
-//    }
+    @Override
+    public boolean matchesName(String name) {
+        // partial match for name (case-insensitive)
+        //for instance, when searching "john" matches "John Smith" or "Alice Johnson"
+        return this.studentName.toLowerCase().contains(name.toLowerCase());
+    }
 
-   // public boolean isPassing(){ // this method checks if a student passes based on passing grade
-//        return calculateAverageGrade() >= getPassingGrade();
-//    }
+    @Override
+    public boolean matchesType(String type) {
+        //this checks if student type matches search criteria
+        return this.getStudentType().equalsIgnoreCase(type);
+    }
+
+    // implementing Calculable interface
+    @Override
+    public double calculateAverage() {
+        if (gradeManager == null) return 0.0;
+        return gradeManager.calculateOverallAverage(studentId);
+    }
+
 
     //Abstract methods that must be implemented in subclasses
     public abstract double getPassingGrade();// returns the minimum passing grade

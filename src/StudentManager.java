@@ -39,6 +39,78 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return null;// not found so it returns null
     }
 
+    // this method searches students by name (partial match)
+    // returns array of matching students
+    public Student[] searchByName(String name) {
+        // first count matches
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesName(name)) {
+                matchCount++;
+            }
+        }
+
+        // creates array of exact size
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        // fills array with matches
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesName(name)) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
+
+    //this method searches students by type (Regular or Honors)
+    public Student[] searchByType(String type) {
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesType(type)) {
+                matchCount++;
+            }
+        }
+
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesType(type)) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
+    // this method searches students by grade range
+    // for instance minGrade=80, maxGrade=90 finds students with 80-90% average
+    public Student[] searchByGradeRange(double minGrade, double maxGrade) {
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            double avg = students[i].calculateAverageGrade();
+            if (avg >= minGrade && avg <= maxGrade) {
+                matchCount++;
+            }
+        }
+
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        for (int i = 0; i < studentCount; i++) {
+            double avg = students[i].calculateAverageGrade();
+            if (avg >= minGrade && avg <= maxGrade) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
+
     // this method displays all students
     public void viewAllStudents() {
         if (studentCount == 0) {//checking if there are any students
@@ -105,6 +177,15 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
     // this method returns the total number of students
     public int getStudentCount() {
         return studentCount;
+    }
+
+    //this method gets all students (for statistics)
+    public Student[] getAllStudents() {
+        Student[] allStudents = new Student[studentCount];
+        for (int i = 0; i < studentCount; i++) {
+            allStudents[i] = students[i];
+        }
+        return allStudents;
     }
 }
 

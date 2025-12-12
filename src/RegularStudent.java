@@ -45,5 +45,26 @@ public class RegularStudent extends Student {//a subclass of the Student class w
         return average >= passingGrade; //true if average >=50%
     }
 
+    // implementing GPA calculation - this converts percentage to 4.0 scale
+    @Override
+    public double calculateGPA() {
+        double average = calculateAverageGrade();
+        return GPACalculator.percentageToGPA(average);
+    }
+
+    // implementing exportToText from Exportable Interface - this creates a text representation for file export
+    @Override
+    public String exportToText() {
+        StringBuilder stringBuilder1 = new StringBuilder();
+        stringBuilder1.append("Student ID: ").append(getStudentId()).append("\n");
+        stringBuilder1.append("Name: ").append(getStudentName()).append("\n");
+        stringBuilder1.append("Type: ").append(getStudentType()).append(" Student\n");
+        stringBuilder1.append("Age: ").append(getStudentAge()).append("\n");
+        stringBuilder1.append("Email: ").append(getStudentEmail()).append("\n");
+        stringBuilder1.append("Phone: ").append(getStudentPhone()).append("\n");
+        stringBuilder1.append("Status: ").append(getStudentStatus()).append("\n");
+        return stringBuilder1.toString();
+    }
+
 
 }

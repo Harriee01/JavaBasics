@@ -39,6 +39,31 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return null;// not found so it returns null
     }
 
+    // searching students by name (partial match)
+    // returns array of matching students
+    public Student[] searchByName(String name) {
+        // first count matches
+        int matchCount = 0;
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesName(name)) {
+                matchCount++;
+            }
+        }
+
+        // creates array of exact size
+        Student[] matches = new Student[matchCount];
+        int index = 0;
+
+        // fills array with matches
+        for (int i = 0; i < studentCount; i++) {
+            if (students[i].matchesName(name)) {
+                matches[index++] = students[i];
+            }
+        }
+
+        return matches;
+    }
+
     // this method displays all students
     public void viewAllStudents() {
         if (studentCount == 0) {//checking if there are any students

@@ -354,7 +354,7 @@ public class Main {// the entry point of the application
 //                    break;
 
 
-                 case 5:  // EXPORT GRADE REPORT (NEW)
+                 case "5":  // EXPORT GRADE REPORT (NEW)
                      System.out.println();
                      System.out.print("Enter choice: 5");
                      System.out.println();
@@ -402,7 +402,7 @@ public class Main {// the entry point of the application
                      scanner.nextLine();
                      break;
 
-                 case 6:  // CALCULATE STUDENT GPA (NEW)
+                 case "6":  // CALCULATE STUDENT GPA (NEW)
                      System.out.println();
                      System.out.print("Enter choice: 6");
                      System.out.println();
@@ -499,6 +499,60 @@ public class Main {// the entry point of the application
                      System.out.print("Press Enter to continue...");
                      scanner.nextLine();
                      break;
+
+                 case "7":  // BULK IMPORT GRADES (NEW)
+                     System.out.println();
+                     System.out.print("Enter choice: 7");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("═══════════════════════════════════════════════════");
+                     System.out.println("BULK IMPORT GRADES");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     System.out.println("Place your CSV file in: ./imports/");
+                     System.out.println();
+                     System.out.println("CSV Format Required:");
+                     System.out.println("StudentID,SubjectName,SubjectType,Grade");
+                     System.out.println("Example: STU001,Mathematics,Core,85");
+                     System.out.println();
+
+                     System.out.print("Enter filename (without extension): ");
+                     String csvFilename = scanner.nextLine();
+
+                     System.out.println();
+
+                     // Import grades using BulkImportService
+                     int[] results = BulkImportService.importGradesFromCSV(
+                             csvFilename, studentManager, gradeManager,
+                             coreSubjects, electiveSubjects
+                     );
+
+                     // Display import summary
+                     System.out.println();
+                     System.out.println("IMPORT SUMMARY");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+                     System.out.println("Total Rows: " + results[0]);
+                     System.out.println("Successfully Imported: " + results[1]);
+                     System.out.println("Failed: " + results[2]);
+                     System.out.println();
+
+                     if (results[1] > 0) {
+                         System.out.println("✓ Import completed!");
+                         System.out.println("  " + results[1] + " grades added to system");
+                     }
+
+                     if (results[2] > 0) {
+                         System.out.println();
+                         System.out.println("Failed Records:");
+                     }
+
+                     System.out.println();
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
+                     break;
+
 
                  // 5. exit system
 

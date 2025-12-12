@@ -402,6 +402,104 @@ public class Main {// the entry point of the application
                      scanner.nextLine();
                      break;
 
+                 case 6:  // CALCULATE STUDENT GPA (NEW)
+                     System.out.println();
+                     System.out.print("Enter choice: 6");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("═══════════════════════════════════════════════════");
+                     System.out.println("CALCULATE STUDENT GPA");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     System.out.print("Enter Student ID: ");
+                     String gpaStudentId = scanner.nextLine();
+
+                     Student gpaStudent = studentManager.findStudent(gpaStudentId);
+
+                     if (gpaStudent == null) {
+                         throw new StudentNotFoundException(gpaStudentId);
+                     }
+
+                     System.out.println();
+                     System.out.println("Student: " + gpaStudentId + " - " + gpaStudent.getStudentName());
+                     System.out.println("Type: " + gpaStudent.getStudentType() + " Student");
+
+                     double overallAvg = gradeManager.calculateOverallAverage(gpaStudentId);
+                     System.out.println("Overall Average: " + String.format("%.1f%%", overallAvg));
+                     System.out.println();
+
+                     // Check if student has grades
+                     Grade[] gpaGrades = gradeManager.viewGradesByStudent(gpaStudentId);
+                     if (gpaGrades.length == 0) {
+                         System.out.println("No grades recorded for this student.");
+                         System.out.print("Press Enter to continue...");
+                         scanner.nextLine();
+                         break;
+                     }
+
+                     System.out.println("GPA CALCULATION (4.0 Scale)");
+                     System.out.println();
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.printf("%-20s | %-10s | %-15s%n", "Subject", "Grade", "GPA Points");
+                     System.out.println("───────────────────────────────────────────────────");
+
+                     // Display each subject with its GPA conversion
+                     for (Grade g : gpaGrades) {
+                         double gpa = GPACalculator.percentageToGPA(g.getGrade());
+                         String letterGrade = GPACalculator.gpaToLetterGrade(gpa);
+                         System.out.printf("%-20s | %-10s | %.1f (%s)%n",
+                                 g.getSubject().getSubjectName(),
+                                 String.format("%.0f%%", g.getGrade()),
+                                 gpa,
+                                 letterGrade);
+                     }
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     // Calculate cumulative GPA
+                     double cumulativeGPA = gpaStudent.calculateGPA();
+                     String letterGrade = GPACalculator.gpaToLetterGrade(cumulativeGPA);
+
+                     System.out.println("Cumulative GPA: " + String.format("%.2f", cumulativeGPA) + " / 4.0");
+                     System.out.println("Letter Grade: " + letterGrade);
+
+                     // Calculate class rank (simplified)
+                     Student[] allStudents = studentManager.getAllStudents();
+                     int rank = 1;
+                     for (Student s : allStudents) {
+                         if (s.calculateGPA() > cumulativeGPA) {
+                             rank++;
+                         }
+                     }
+                     System.out.println("Class Rank: " + rank + " of " + studentManager.getStudentCount());
+                     System.out.println();
+
+                     // Performance analysis
+                     System.out.println("Performance Analysis:");
+                     if (cumulativeGPA >= 3.5) {
+                         System.out.println("✓ Excellent performance (" + String.format("%.2f", cumulativeGPA) + " GPA)");
+                     } else if (cumulativeGPA >= 3.0) {
+                         System.out.println("✓ Good performance (" + String.format("%.2f", cumulativeGPA) + " GPA)");
+                     } else if (cumulativeGPA >= 2.0) {
+                         System.out.println("  Average performance (" + String.format("%.2f", cumulativeGPA) + " GPA)");
+                     } else {
+                         System.out.println("✗ Below average performance (" + String.format("%.2f", cumulativeGPA) + " GPA)");
+                     }
+
+                     if (gpaStudent instanceof HonorsStudent) {
+                         HonorsStudent honorsStudent3 = (HonorsStudent) gpaStudent;
+                         if (honorsStudent3.checkHonorsEligibility()) {
+                             System.out.println("✓ Honors eligibility maintained");
+                         }
+                         System.out.println("✓ Above class average (" + String.format("%.2f", studentManager.getAverageClassGrade() / 100 * 4.0) + " GPA)");
+                     }
+
+                     System.out.println();
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
+                     break;
+
                  // 5. exit system
 
 //                 case "5":

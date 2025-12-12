@@ -354,19 +354,67 @@ public class Main {// the entry point of the application
 //                    break;
 
 
-                 // 5. exit system
+                 case 5:  // EXPORT GRADE REPORT (NEW)
+                     System.out.println();
+                     System.out.print("Enter choice: 5");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("═══════════════════════════════════════════════════");
+                     System.out.println("EXPORT GRADE REPORT");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
 
-                 case "5":
-                     System.out.println("Exiting system. Goodbye!");
-                     running = false;
+                     System.out.print("Enter Student ID: ");
+                     String exportStudentId = scanner.nextLine();
+
+                     Student exportStudent = studentManager.findStudent(exportStudentId);
+
+                     if (exportStudent == null) {
+                         throw new StudentNotFoundException(exportStudentId);
+                     }
+
+                     System.out.println();
+                     System.out.println("Student: " + exportStudentId + " - " + exportStudent.getStudentName());
+                     System.out.println("Type: " + exportStudent.getStudentType() + " Student");
+
+                     int totalGrades = gradeManager.getGradeCountForStudent(exportStudentId);
+                     System.out.println("Total Grades: " + totalGrades);
+                     System.out.println();
+
+                     System.out.println("Export options:");
+                     System.out.println("1. Summary Report (overview only)");
+                     System.out.println("2. Detailed Report (all grades)");
+                     System.out.println("3. Both");
+                     System.out.println();
+                     System.out.print("Select option (1-3): ");
+                     int exportOption = scanner.nextInt();
+                     scanner.nextLine();
+
+                     System.out.println();
+                     System.out.print("Enter filename (without extension): ");
+                     String filename = scanner.nextLine();
+
+                     boolean detailed = (exportOption == 2 || exportOption == 3);
+                     FileExporter.exportGradeReport(exportStudent, gradeManager, filename, detailed);
+
+                     System.out.println();
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
                      break;
 
+                 // 5. exit system
 
-                 // INVALID OPTION
-
-                 default:
-                     System.out.println("Invalid choice. Try again.");
-             }
+//                 case "5":
+//                     System.out.println("Exiting system. Goodbye!");
+//                     running = false;
+//                     break;
+//
+//
+//                 // INVALID OPTION
+//
+//                 default:
+//                     System.out.println("Invalid choice. Try again.");
+//             }
          } catch (StudentNotFoundException e) {
              // CATCH specific exception for student not found
              System.out.println();

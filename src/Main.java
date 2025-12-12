@@ -735,6 +735,110 @@ public class Main {// the entry point of the application
                      break;
 
 
+                 case "9":  // SEARCH STUDENTS (NEW)
+                     System.out.println();
+                     System.out.print("Enter choice: 9");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("═══════════════════════════════════════════════════");
+                     System.out.println("SEARCH STUDENTS");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     System.out.println("Search options:");
+                     System.out.println("1. By Student ID");
+                     System.out.println("2. By Name (partial match)");
+                     System.out.println("3. By Grade Range");
+                     System.out.println("4. By Student Type");
+                     System.out.println();
+                     System.out.print("Select option (1-4): ");
+                     int searchOption = scanner.nextInt();
+                     scanner.nextLine();
+
+                     System.out.println();
+                     Student[] searchResults = null;
+
+                     switch (searchOption) {
+                         case 1:  // Search by ID
+                             System.out.print("Enter Student ID: ");
+                             String searchId = scanner.nextLine();
+                             Student foundNewStudent = studentManager.findStudent(searchId);
+                             if (foundNewStudent != null) {
+                                 searchResults = new Student[]{foundNewStudent};
+                             } else {
+                                 searchResults = new Student[0];
+                             }
+                             break;
+
+                         case 2:  // Search by name
+                             System.out.print("Enter name (partial or full): ");
+                             String searchName = scanner.nextLine();
+                             searchResults = studentManager.searchByName(searchName);
+                             break;
+
+                         case 3:  // Search by grade range
+                             System.out.print("Enter minimum grade: ");
+                             double minGrade = scanner.nextDouble();
+                             System.out.print("Enter maximum grade: ");
+                             double maxGrade = scanner.nextDouble();
+                             scanner.nextLine();
+                             searchResults = studentManager.searchByGradeRange(minGrade, maxGrade);
+                             break;
+
+                         case 4:  // Search by type
+                             System.out.println("Student types:");
+                             System.out.println("1. Regular");
+                             System.out.println("2. Honors");
+                             System.out.print("Select type: ");
+                             int typeChoice = scanner.nextInt();
+                             scanner.nextLine();
+                             String searchType = (typeChoice == 1) ? "Regular" : "Honors";
+                             searchResults = studentManager.searchByType(searchType);
+                             break;
+                     }
+
+                     // Display search results
+                     System.out.println();
+
+                     if (searchResults == null || searchResults.length == 0) {
+                         System.out.println("No students found matching search criteria.");
+                     } else {
+                         System.out.println("SEARCH RESULTS (" + searchResults.length + " found)");
+                         System.out.println("───────────────────────────────────────────────────");
+                         System.out.println();
+                         System.out.printf("%-10s | %-20s | %-10s | %-10s%n",
+                                 "STU ID", "NAME", "TYPE", "AVG");
+                         System.out.println("───────────────────────────────────────────────────");
+
+                         for (Student student : searchResults) {
+                             System.out.printf("%-10s | %-20s | %-10s | %.1f%%%n",
+                                     student.getStudentId(),
+                                     student.getStudentName(),
+                                     student.getStudentType(),
+                                     student.calculateAverageGrade());
+                         }
+                         System.out.println("───────────────────────────────────────────────────");
+                         System.out.println();
+
+                         // Offer actions on search results
+                         System.out.println("Actions:");
+                         System.out.println("1. View full details for a student");
+                         System.out.println("2. Export search results");
+                         System.out.println("3. New search");
+                         System.out.println("4. Return to main menu");
+                         System.out.println();
+                         System.out.print("Enter choice: ");
+                         // This would continue with action handling...
+                         scanner.nextLine();
+                     }
+
+                     System.out.println();
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
+                     break;
+
+
+
                  // 5. exit system
 
 //                 case "5":

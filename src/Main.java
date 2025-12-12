@@ -553,6 +553,187 @@ public class Main {// the entry point of the application
                      scanner.nextLine();
                      break;
 
+                 case "8":  // VIEW CLASS STATISTICS (NEW)
+                     System.out.println();
+                     System.out.print("Enter choice: 8");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("═══════════════════════════════════════════════════");
+                     System.out.println("CLASS STATISTICS");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     System.out.println("Total Students: " + studentManager.getStudentCount());
+                     System.out.println("Total Grades Recorded: " + gradeManager.getGradeCount());
+                     System.out.println();
+
+                     // Get all grades for analysis
+                     Grade[] allGrades = gradeManager.getAllGrades();
+
+                     if (allGrades.length == 0) {
+                         System.out.println("No grades recorded yet.");
+                         System.out.print("Press Enter to continue...");
+                         scanner.nextLine();
+                         break;
+                     }
+
+                     // Convert grades to array of doubles for statistics
+                     double[] gradeValues = new double[allGrades.length];
+                     for (int i = 0; i < allGrades.length; i++) {
+                         gradeValues[i] = allGrades[i].getGrade();
+                     }
+
+                     // GRADE DISTRIBUTION - count grades in each range
+                     System.out.println("GRADE DISTRIBUTION");
+                     System.out.println("───────────────────────────────────────────────────");
+
+                     int countA = 0, countB = 0, countC = 0, countD = 0, countF = 0;
+                     for (double grade : gradeValues) {
+                         if (grade >= 90) countA++;
+                         else if (grade >= 80) countB++;
+                         else if (grade >= 70) countC++;
+                         else if (grade >= 60) countD++;
+                         else countF++;
+                     }
+
+                     // Display with percentages and visual bar
+                     System.out.printf("90-100%% (A): %-20s %.1f%% (%d grades)%n",
+                             createBar(countA, allGrades.length),
+                             (countA * 100.0 / allGrades.length), countA);
+                     System.out.printf("80-89%%  (B): %-20s %.1f%% (%d grades)%n",
+                             createBar(countB, allGrades.length),
+                             (countB * 100.0 / allGrades.length), countB);
+                     System.out.printf("70-79%%  (C): %-20s %.1f%% (%d grades)%n",
+                             createBar(countC, allGrades.length),
+                             (countC * 100.0 / allGrades.length), countC);
+                     System.out.printf("60-69%%  (D): %-20s %.1f%% (%d grades)%n",
+                             createBar(countD, allGrades.length),
+                             (countD * 100.0 / allGrades.length), countD);
+                     System.out.printf("0-59%%   (F): %-20s %.1f%% (%d grade)%n",
+                             createBar(countF, allGrades.length),
+                             (countF * 100.0 / allGrades.length), countF);
+                     System.out.println();
+
+                     // STATISTICAL ANALYSIS
+                     System.out.println("STATISTICAL ANALYSIS");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+                     System.out.println("Mean (Average):     " + String.format("%.1f%%", StatisticsCalculator.calculateMean(gradeValues)));
+                     System.out.println("Median:             " + String.format("%.1f%%", StatisticsCalculator.calculateMedian(gradeValues)));
+                     System.out.println("Mode:               " + String.format("%.1f%%", StatisticsCalculator.calculateMode(gradeValues)));
+                     System.out.println("Standard Deviation: " + String.format("%.1f%%", StatisticsCalculator.calculateStandardDeviation(gradeValues)));
+
+                     double min = StatisticsCalculator.findMin(gradeValues);
+                     double max = StatisticsCalculator.findMax(gradeValues);
+                     System.out.println("Range:              " + String.format("%.1f%% (%.0f%% ~ %.0f%%)", max - min, min, max));
+                     System.out.println();
+
+                     // Find highest and lowest grades with student names
+                     System.out.println("Highest Grade:      " + String.format("%.0f%%", max));
+                     for (Grade grades2 : allGrades) {
+                         if (grades2.getGrade() == max) {
+                             Student student4 = studentManager.findStudent(grades2.getStudentId());
+                             System.out.println("                    (" + grades2.getStudentId() + " - " +
+                                     (student4 != null ? student4.getStudentName() : "Unknown") + " in " + grades2.getSubject().getSubjectName() + ")");
+                             break;
+                         }
+                     }
+
+                     System.out.println("Lowest Grade:       " + String.format("%.0f%%", min));
+                     for (Grade grades3 : allGrades) {
+                         if (grades3.getGrade() == min) {
+                             Student student5 = studentManager.findStudent(grades3.getStudentId());
+                             System.out.println("                    (" + grades3.getStudentId() + " - " +
+                                     (student5 != null ? student5.getStudentName() : "Unknown") + " in " + grades3.getSubject().getSubjectName() + ")");
+                             break;
+                         }
+                     }
+                     System.out.println();
+
+                     // SUBJECT PERFORMANCE
+                     System.out.println("SUBJECT PERFORMANCE");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     // Calculate averages for core subjects
+                     System.out.println("Core Subjects:");
+                     double totalCoreAvg = 0;
+                     for (CoreSubject coreSubject : coreSubjects) {
+                         Grade[] subjectGrades = gradeManager.getGradesBySubject(coreSubject.getSubjectName());
+                         if (subjectGrades.length > 0) {
+                             double[] subjectValues = new double[subjectGrades.length];
+                             for (int i = 0; i < subjectGrades.length; i++) {
+                                 subjectValues[i] = subjectGrades[i].getGrade();
+                             }
+                             double avg = StatisticsCalculator.calculateMean(subjectValues);
+                             totalCoreAvg += avg;
+                             System.out.println("  " + coreSubject.getSubjectName() + ": " + String.format("%.1f%%", avg));
+                         }
+                     }
+                     double coreAvgOverall = totalCoreAvg / coreSubjects.length;
+                     System.out.println("                    " + String.format("%.1f%%", coreAvgOverall) + " average");
+                     System.out.println();
+
+                     // Calculate averages for elective subjects
+                     System.out.println("Elective Subjects:");
+                     double totalElectiveAvg = 0;
+                     for (ElectiveSubject electiveSubject : electiveSubjects) {
+                         Grade[] subjectGrades = gradeManager.getGradesBySubject(electiveSubject.getSubjectName());
+                         if (subjectGrades.length > 0) {
+                             double[] subjectValues = new double[subjectGrades.length];
+                             for (int i = 0; i < subjectGrades.length; i++) {
+                                 subjectValues[i] = subjectGrades[i].getGrade();
+                             }
+                             double avg = StatisticsCalculator.calculateMean(subjectValues);
+                             totalElectiveAvg += avg;
+                             System.out.println("  " + electiveSubject.getSubjectName() + ": " + String.format("%.1f%%", avg));
+                         }
+                     }
+                     double electiveAvgOverall = totalElectiveAvg / electiveSubjects.length;
+                     System.out.println("                    " + String.format("%.1f%%", electiveAvgOverall) + " average");
+                     System.out.println();
+
+                     // STUDENT TYPE COMPARISON
+                     System.out.println("STUDENT TYPE COMPARISON");
+                     System.out.println("───────────────────────────────────────────────────");
+                     System.out.println();
+
+                     // Calculate averages for regular vs honors students
+                     Student[] regularStudents = studentManager.searchByType("Regular");
+                     Student[] honorsStudents = studentManager.searchByType("Honors");
+
+                     double regularAvg = 0;
+                     int regularCount = 0;
+                     for (Student student5 : regularStudents) {
+                         double avg = student5.calculateAverageGrade();
+                         if (avg > 0) {
+                             regularAvg += avg;
+                             regularCount++;
+                         }
+                     }
+                     if (regularCount > 0) regularAvg /= regularCount;
+
+                     double honorsAvg = 0;
+                     int honorsCount = 0;
+                     for (Student student5 : honorsStudents) {
+                         double avg = student5.calculateAverageGrade();
+                         if (avg > 0) {
+                             honorsAvg += avg;
+                             honorsCount++;
+                         }
+                     }
+                     if (honorsCount > 0) honorsAvg /= honorsCount;
+
+                     System.out.println("Regular Students:   " + String.format("%.1f%%", regularAvg) +
+                             " average (" + regularStudents.length + " students)");
+                     System.out.println("Honors Students:    " + String.format("%.1f%%", honorsAvg) +
+                             " average (" + honorsStudents.length + " students)");
+                     System.out.println();
+
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
+                     break;
+
 
                  // 5. exit system
 
@@ -614,6 +795,17 @@ public class Main {// the entry point of the application
          }
 
          }
+
+         // HELPER METHOD - creates visual bar for grade distribution
+    // Takes count and total, returns string of █ characters
+    private static String createBar(int count, int total) {
+        int barLength = (int) ((count * 20.0) / total);  // Scale to max 20 characters
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < barLength; i++) {
+            bar.append("█");
+        }
+        return bar.toString();
+    }
 
 
 

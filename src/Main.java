@@ -839,6 +839,23 @@ public class Main {// the entry point of the application
 
 
 
+                 case "10":  // EXIT
+                     System.out.println();
+                     System.out.print("Enter choice: 10");
+                     System.out.println();
+                     System.out.println();
+                     System.out.println("Exiting system. Goodbye!");
+                     running = false;
+                     break;
+
+                 default:
+                     System.out.println();
+                     System.out.println("Invalid choice. Please select 1-10.");
+                     System.out.print("Press Enter to continue...");
+                     scanner.nextLine();
+                     break;
+
+
                  // 5. exit system
 
 //                 case "5":

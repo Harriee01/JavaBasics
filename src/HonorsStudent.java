@@ -55,10 +55,31 @@ public class HonorsStudent extends Student {// a subclass of the Student class w
     // Getter for honors eligibility
     public boolean isHonorsEligible() {
         return honorsEligible;
+
     }
 
-//    public boolean checkHonorsEligibility() {
-//        return calculateAverageGrade() >= 85.0;
-//    }
+    //implementing GPA calculation - this converts percentage to 4.0 scale
+    @Override
+    public double calculateGPA() {
+        double average = calculateAverageGrade();
+        return GPACalculator.percentageToGPA(average);
+    }
+
+    //implementing exportToText from Exportable Interface - this creates a text representation for file export
+    @Override
+    public String exportToText() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Student ID: ").append(getStudentId()).append("\n");
+        stringBuilder.append("Name: ").append(getStudentName()).append("\n");
+        stringBuilder.append("Type: ").append(getStudentType()).append(" Student\n");
+        stringBuilder.append("Age: ").append(getStudentAge()).append("\n");
+        stringBuilder.append("Email: ").append(getStudentEmail()).append("\n");
+        stringBuilder.append("Phone: ").append(getStudentPhone()).append("\n");
+        stringBuilder.append("Honors Eligible: ").append(honorsEligible ? "Yes" : "No").append("\n");
+        stringBuilder.append("Status: ").append(getStudentStatus()).append("\n");
+        return stringBuilder.toString();
+    }
+
+
 
 }

@@ -178,5 +178,14 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
     public int getStudentCount() {
         return studentCount;
     }
+
+    //this method gets all students (for statistics)
+    public Student[] getAllStudents() {
+        Student[] allStudents = new Student[studentCount];
+        for (int i = 0; i < studentCount; i++) {
+            allStudents[i] = students[i];
+        }
+        return allStudents;
+    }
 }
 

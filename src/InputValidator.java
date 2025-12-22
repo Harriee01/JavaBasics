@@ -31,6 +31,19 @@ public class InputValidator {
         }
     }
 
+     //Validates a phone number format.
+     //Accepts international formats with country codes.
+    public static void validatePhone(String phone) throws ValidationException {
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new ValidationException("Phone number cannot be empty.");
+        }
+
+        if (!PHONE_PATTERN.matcher(phone).matches()) {
+            throw new ValidationException("Invalid phone number format: " + phone);
+        }
+    }
+
+
 
 
 

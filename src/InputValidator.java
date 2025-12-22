@@ -18,6 +18,20 @@ public class InputValidator {
     private static final Pattern NAME_PATTERN =
             Pattern.compile("^[A-Za-z ]{2,50}$");
 
+    //Validates an email address format.
+    //Throws ValidationException if email is invalid.
+    public static void validateEmail(String email) throws ValidationException {
+        if (email == null || email.trim().isEmpty()) {
+            throw new ValidationException("Email cannot be empty.");
+        }
+
+        // Use pre-compiled pattern for faster matching
+        if (!EMAIL_PATTERN.matcher(email).matches()) {
+            throw new ValidationException("Invalid email format: " + email);
+        }
+    }
+
+
 
 
 }

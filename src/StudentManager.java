@@ -233,6 +233,39 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
     }
 
+
+    // this method displays a summary report of all students
+    public void displayStudentSummary() {
+        System.out.println("=== STUDENT SUMMARY REPORT ===");
+        System.out.println("Total Students: " + students.size());
+
+        int regularCount = 0;
+        int honorsCount = 0;
+        int passingCount = 0;
+
+        // Count different types of students
+        for (Student student : students) {
+            if (student.getStudentType().equals("Regular")) {
+                regularCount++;
+            } else {
+                honorsCount++;
+            }
+
+            if (student.isPassing()) {
+                passingCount++;
+            }
+        }
+
+        System.out.println("Regular Students: " + regularCount);
+        System.out.println("Honors Students: " + honorsCount);
+        System.out.println("Passing Students: " + passingCount);
+        System.out.printf("Class Average: %.2f%%\n", getAverageClassGrade());
+        System.out.println("===============================");
+
+        AppLogger.info("Displayed student summary: " + students.size() +
+                " students, " + passingCount + " passing.");
+    }
+
 }
 
 

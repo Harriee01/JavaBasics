@@ -18,7 +18,7 @@ public class GradeManager {// uses composition; manages all the grades in the sy
 
         try {
             // Validate grade value
-            InputValidator.validateGrade(grade.getGradeValue());
+            InputValidator.validateGrade(grade.getGrade());
 
             // Check for existing grade for same student and subject
             removeExistingGrade(grade.getStudentId(), grade.getSubject());
@@ -28,7 +28,7 @@ public class GradeManager {// uses composition; manages all the grades in the sy
             AppLogger.info("Grade added: ID=" + grade.getGradeId() +
                     ", Student=" + grade.getStudentId() +
                     ", Subject=" + grade.getSubject().getSubjectCode() +
-                    ", Grade=" + grade.getGradeValue());
+                    ", Grade=" + grade.getGrade());
 
         } finally {
             AppLogger.exit("addGrade");
@@ -93,7 +93,7 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         // sums only core subject grades
         for (Grade grade : studentGrades) {
             if (grade.getSubject().getSubjectType().equals("Core")) {
-                total += grade.getGradeValue();
+                total += grade.getGrade();
                 count++;
             }
         }
@@ -116,7 +116,7 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         // Sum only elective subject grades
         for (Grade grade : studentGrades) {
             if (grade.getSubject().getSubjectType().equals("Elective")) {
-                total += grade.getGradeValue();
+                total += grade.getGrade();
                 count++;
             }
         }
@@ -138,7 +138,7 @@ public class GradeManager {// uses composition; manages all the grades in the sy
 
         // Sum all grades
         for (Grade grade : studentGrades) {
-            total += grade.getGradeValue();
+            total += grade.getGrade();
         }
 
         double average = count > 0 ? total / count : 0.0;
@@ -148,67 +148,54 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         return average;
     }
 
-//this method calculates overall average(all subjects)
-//public double calculateOverallAverage(String studentId) {
-//    double total = 0;
-//    int count = 0;
-//
-//    for (int i = 0; i < gradeCount; i++) {
-//        if (grades[i].getStudentId().equals(studentId)) {
-//            total += grades[i].getGrade();
-//            count++;
-//        }
-//    }
-//
-//    if (count == 0) return 0.0;
-//    return total / count;
-//    }
+    //this method returns the current number of grades in the system
+    public int getGradeCount() {
+        return grades.size();
+    }
+
+
 
     //this method get the count of grades for a specific student
-    public int getGradeCountForStudent(String studentId) {
-        int count = 0;
-        for (int i = 0; i < gradeCount; i++) {
-            if (grades[i].getStudentId().equals(studentId)) {
-                count++;
-            }
-        }
-        return count;
-    }
+//    public int getGradeCountForStudent(String studentId) {
+//        int count = 0;
+//        for (int i = 0; i < gradeCount; i++) {
+//            if (grades[i].getStudentId().equals(studentId)) {
+//                count++;
+//            }
+//        }
+//        return count;
+//    }
 
-    // this method gets the  total number of grades
-    public int getGradeCount() {
-        return gradeCount;
-    }
 
     // this method gets all grades (for statistics)
-    public Grade[] getAllGrades() {
-        Grade[] allGrades = new Grade[gradeCount];
-        for (int i = 0; i < gradeCount; i++) {
-            allGrades[i] = grades[i];
-        }
-        return allGrades;
-    }
+//    public Grade[] getAllGrades() {
+//        Grade[] allGrades = new Grade[gradeCount];
+//        for (int i = 0; i < gradeCount; i++) {
+//            allGrades[i] = grades[i];
+//        }
+//        return allGrades;
+//    }
 
     //this method gets grades of students by subject name
-    public Grade[] getGradesBySubject(String subjectName) {
-        int count = 0;
-        for (int i = 0; i < gradeCount; i++) {
-            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
-                count++;
-            }
-        }
+//    public Grade[] getGradesBySubject(String subjectName) {
+//        int count = 0;
+//        for (int i = 0; i < gradeCount; i++) {
+//            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
+//                count++;
+//            }
+//        }
 
-        Grade[] subjectGrades = new Grade[count];
-        int index = 0;
-
-        for (int i = 0; i < gradeCount; i++) {
-            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
-                subjectGrades[index++] = grades[i];
-            }
-        }
-
-        return subjectGrades;
-    }
+//        Grade[] subjectGrades = new Grade[count];
+//        int index = 0;
+//
+//        for (int i = 0; i < gradeCount; i++) {
+//            if (grades[i].getSubject().getSubjectName().equalsIgnoreCase(subjectName)) {
+//                subjectGrades[index++] = grades[i];
+//            }
+//        }
+//
+//        return subjectGrades;
+//    }
 
 }
 

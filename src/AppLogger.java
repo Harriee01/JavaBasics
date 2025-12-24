@@ -45,7 +45,7 @@ public class AppLogger {
     }
 
 
-     //Logs an informational message
+     // Logs an informational message
     public static void info(String message) {
         logger.info(message);
     }
@@ -65,5 +65,19 @@ public class AppLogger {
         logger.log(Level.SEVERE, message, e);
     }
 
+    //Logs a debug message (for development)
+    public static void debug(String message) {
+        logger.fine(message);
+    }
+
+    //Logs method entry for debugging
+    public static void enter(String methodName) {
+        logger.entering(AppLogger.class.getName(), methodName);
+    }
+
+    // Logs method exit for debugging
+    public static void exit(String methodName) {
+        logger.exiting(AppLogger.class.getName(), methodName);
+    }
 
 }

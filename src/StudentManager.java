@@ -1,18 +1,30 @@
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Refactored StudentManager following SOLID principles:
+ * - Single Responsibility: Only manages student operations
+ * - Open/Closed: Open for extension via interfaces
+ * - Liskov Substitution: Works with any Student subclass
+ * - Interface Segregation: Uses specific interfaces
+ * - Dependency Inversion: Depends on abstractions (List instead of array)
+ */
+
 public class StudentManager {// uses composition(it HAS-A array of Students); manages all students in the system
     //private fields specific to StudentManager for managing students
-    private Student[] students;  // array to store all students
+    private List<Student> students;   // Changed from array to List for flexibility (Open/Closed Principle)
     private int studentCount;    // tracks number of current registered students
 
-    //referencing the GradeManager class for the sake of calculating averages
+    //**referencing the GradeManager class for the sake of calculating averages
     private GradeManager gradeManager;
 
-    //this constructor creates an empty student array
+    //this constructor creates an empty student list
     public StudentManager() {
-        students = new Student[50];  // initializing the  array with maximum size of 50
-        studentCount = 0;  // starting with no(zero) students
+       this.students = new ArrayList<>();  // using List interface (Dependency inversion)
+        AppLogger.info("Student Manager initialized with empty student list");
     }
 
-    // this method sets the  GradeManager reference
+    //**this method sets the  GradeManager reference
     public void setGradeManager(GradeManager gradeManager01) {
         this.gradeManager = gradeManager01;
     }

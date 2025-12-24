@@ -75,6 +75,15 @@ public class InputValidator {
         }
     }
 
+     //Validates an age must be between 5 and 100
+    public static void validateAge(int age) throws ValidationException {
+        if (age < 5 || age > 100) {
+            throw new ValidationException(
+                    String.format("Age must be between 5 and 100. Received: %d", age)
+            );
+        }
+    }
+
 
 
 

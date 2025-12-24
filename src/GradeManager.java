@@ -44,6 +44,25 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         );
     }
 
+    // this method gets all grades for a specific student
+    public List<Grade> getGradesByStudent(String studentId) throws StudentNotFoundException {
+        AppLogger.enter("getGradesByStudent");
+
+        List<Grade> studentGrades = new ArrayList<>();
+
+        // Filter grades for the specified student
+        for (Grade grade : grades) {
+            if (grade.getStudentId().equals(studentId)) {
+                studentGrades.add(grade);
+            }
+        }
+
+        AppLogger.debug("Found " + studentGrades.size() + " grades for student: " + studentId);
+        AppLogger.exit("getGradesByStudent");
+
+        return studentGrades;
+    }
+
 
 //method to get all grades for a specific student
 public Grade[] viewGradesByStudent(String studentId) {
@@ -196,81 +215,4 @@ public double calculateOverallAverage(String studentId) {
 
 
 
-//        double coreAverage = calculateCoreAverage(studentId)
-//        double electiveAverage = calculateElectiveAverage(studentId);
-//        double overallAverage = calculateOverallAverage(studentId);
-//
-//        System.out.println("\n--- Averages ---");
-//        System.out.println("Core Subjects Average: " + (coreAverage >= 0 ? coreAverage : "N/A"));
-//        System.out.println("Elective Subjects Average: " + (electiveAverage >= 0 ? electiveAverage : "N/A"));
-//        System.out.println("Overall Average: " + (overallAverage >= 0 ? overallAverage : "N/A"));
-//
-//        // Performance summary
-//        System.out.println("\n--- Performance Summary ---");
-//        if (overallAverage >= 0) {
-//            if (overallAverage >= 50) System.out.println("Status: Passing");
-//            else System.out.println("Status: Failing");
-//        } else {
-//            System.out.println("No grades available to determine performance.");
-//        }
-//
-//        System.out.println("--------------------------------------\n");
-//    }
 
-    // Calculates average of CORE subjects
-//    public double calculateCoreAverage(String studentId) {
-//        double sum = 0;
-//        int count = 0;
-//
-//        for (int i = 0; i < gradeCount; i++) {
-//            Grade grade = grades[i];
-//            if (grade != null && grade.getStudentId().equals(studentId)) {
-//                if (grade.getSubject().getSubjectType().equals("Core")) {
-//                    sum += grade.getGrade();
-//                    count++;
-//                }
-//            }
-//        }
-//
-//        return (count == 0) ? -1 : (sum / count); // -1 means no core grades
-//    }
-//
-//    // Calculates average of ELECTIVE subjects
-//    public double calculateElectiveAverage(String studentId) {
-//        double sum = 0;
-//        int count = 0;
-//
-//        for (int i = 0; i < gradeCount; i++) {
-//            Grade grade = grades[i];
-//            if (grade != null && grade.getStudentId().equals(studentId)) {
-//                if (grade.getSubject().getSubjectType().equals("Elective")) {
-//                    sum += grade.getGrade();
-//                    count++;
-//                }
-//            }
-//        }
-//
-//        return (count == 0) ? -1 : (sum / count); // -1 means no elective grades
-//    }
-//
-//    // Calculates overall average (Core + Elective)
-//    public double calculateOverallAverage(String studentId) {
-//        double sum = 0;
-//        int count = 0;
-//
-//        for (int i = 0; i < gradeCount; i++) {
-//            Grade grade = grades[i];
-//            if (grade != null && grade.getStudentId().equals(studentId)) {
-//                sum += grade.getGrade();
-//                count++;
-//            }
-//        }
-//
-//        return (count == 0) ? -1 : (sum / count); // -1 means no grades
-//    }
-//
-//    // Returns how many grades are stored
-//    public int getGradeCount() {
-//        return gradeCount;
-//    }
-//}

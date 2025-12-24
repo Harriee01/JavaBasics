@@ -101,8 +101,6 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
                 .findFirst()
                 .orElse(null); // Return null if not found
     }
-
-
 //    // this method finds a student by ID
 //    public Student findStudent(String studentId) {
 //        for (int i = 0; i < studentCount; i++) {//looping through all the students
@@ -112,6 +110,11 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 //        }
 //        return null;// not found so it returns null
 //    }
+
+    // returns a copy of all students in the system to maintain encapsulation
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(students); // Defensive copy
+    }
 
     // this method searches students by name (partial match)
     // returns array of matching students
@@ -254,12 +257,12 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
     }
 
     //this method gets all students (for statistics)
-    public Student[] getAllStudents() {
-        Student[] allStudents = new Student[studentCount];
-        for (int i = 0; i < studentCount; i++) {
-            allStudents[i] = students[i];
-        }
-        return allStudents;
-    }
+//    public Student[] getAllStudents() {
+//        Student[] allStudents = new Student[studentCount];
+//        for (int i = 0; i < studentCount; i++) {
+//            allStudents[i] = students[i];
+//        }
+//        return allStudents;
+//    }
 }
 

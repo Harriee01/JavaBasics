@@ -156,35 +156,32 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return classAverage;
     }
 
-
     // returns the number of students in the system
     public int getStudentCount() {
         return students.size();
     }
 
-    // this method searches students by name (partial match)
-    // returns array of matching students
-    public Student[] searchByName(String name) {
-        // first count matches
-        int matchCount = 0;
-        for (int i = 0; i < studentCount; i++) {
-            if (students[i].matchesName(name)) {
-                matchCount++;
+    /**
+     * Searches for students by name (partial matching, case-insensitive).
+     * New feature for Fold 2.
+     */
+    public List<Student> searchByName(String partialName) {
+        AppLogger.enter("searchByName");
+
+        List<Student> results = new ArrayList<>();
+        String searchTerm = partialName.toLowerCase();
+
+        // filters students whose name contains the search term
+        for (Student student : students) {
+            if (student.getStudentName().toLowerCase().contains(searchTerm)) {
+                results.add(student);
             }
         }
 
-        // creates array of exact size
-        Student[] matches = new Student[matchCount];
-        int index = 0;
+        AppLogger.info("Name search for '" + partialName + "' found " + results.size() + " results.");
+        AppLogger.exit("searchByName");
 
-        // fills array with matches
-        for (int i = 0; i < studentCount; i++) {
-            if (students[i].matchesName(name)) {
-                matches[index++] = students[i];
-            }
-        }
-
-        return matches;
+        return results;
     }
 
 

@@ -66,6 +66,16 @@ public class InputValidator {
     }
 
 
+     //Validates a grade value must be between 0 and 100
+    public static void validateGrade(double grade) throws ValidationException {
+        if (grade < 0 || grade > 100) {
+            throw new ValidationException(
+                    String.format("Grade must be between 0 and 100. Received: %.2f", grade)
+            );
+        }
+    }
+
+
 
 
 

@@ -82,67 +82,90 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         AppLogger.info("Displayed grades for student: " + studentId);
     }
 
+    // this method calculates the average grade for a student's core subjects only
+    public double calculateCoreAverage(String studentId) throws StudentNotFoundException {
+        AppLogger.enter("calculateCoreAverage");
 
-//method to get all grades for a specific student
-//public Grade[] viewGradesByStudent(String studentId) {
-//    int count = 0;//counting how many grades a particular student has
-//    for (int i = 0; i < gradeCount; i++) {
-//        if (grades[i].getStudentId().equals(studentId)) {
-//            count++;
-//        }
-//    }
-//    // creating an array of the exact size needed for a student's grades
-//    Grade[] studentGrades = new Grade[count];
-//    int index = 0;
-//    //filling the array with student's grades
-//    for (int i = 0; i < gradeCount; i++) {
-//        if (grades[i].getStudentId().equals(studentId)) {
-//            studentGrades[index] = grades[i];
-//            index++;
-//        }
-//    }
-//    return studentGrades;
-//}
+        List<Grade> studentGrades = getGradesByStudent(studentId);
+        double total = 0.0;
+        int count = 0;
 
+        // sums only core subject grades
+        for (Grade grade : studentGrades) {
+            if (grade.getSubject().getSubjectType().equals("Core")) {
+                total += grade.getGradeValue();
+                count++;
+            }
+        }
+
+        double average = count > 0 ? total / count : 0.0;
+        AppLogger.debug("Core average for " + studentId + ": " + average);
+        AppLogger.exit("calculateCoreAverage");
+
+        return average;
+    }
+
+    // this method calculates the average grade for a student's elective subjects only.
+    public double calculateElectiveAverage(String studentId) throws StudentNotFoundException {
+        AppLogger.enter("calculateElectiveAverage");
+
+        List<Grade> studentGrades = getGradesByStudent(studentId);
+        double total = 0.0;
+        int count = 0;
+
+        // Sum only elective subject grades
+        for (Grade grade : studentGrades) {
+            if (grade.getSubject().getSubjectType().equals("Elective")) {
+                total += grade.getGradeValue();
+                count++;
+            }
+        }
+
+        double average = count > 0 ? total / count : 0.0;
+        AppLogger.debug("Elective average for " + studentId + ": " + average);
+        AppLogger.exit("calculateElectiveAverage");
+
+        return average;
+    }
 
 // This method calculates the average of the core subject grades
-public double calculateCoreAverage(String studentId) {
-    double total = 0; //sum of all core grades
-    int counts = 0; //number of core subjects
-
-    //Looping through all grades
-    for (int i = 0; i < gradeCount; i++) {
-        //Nested if statement to check if a grade belongs to the student in question and whether the subject is a core subject
-        if (grades[i].getStudentId().equals(studentId)) {
-            if (grades[i].getSubject() instanceof CoreSubject) {
-                total += grades[i].getGrade();
-                counts++;
-
-
-            }
-        }
-
-    }
-
-    if (counts ==0) return 0.0; // to avoid division by zero
-    return total/counts; //returns the average
-}
-
+//public double calculateCoreAverage(String studentId) {
+//    double total = 0; //sum of all core grades
+//    int counts = 0; //number of core subjects
+//
+//    //Looping through all grades
+//    for (int i = 0; i < gradeCount; i++) {
+//        //Nested if statement to check if a grade belongs to the student in question and whether the subject is a core subject
+//        if (grades[i].getStudentId().equals(studentId)) {
+//            if (grades[i].getSubject() instanceof CoreSubject) {
+//                total += grades[i].getGrade();
+//                counts++;
+//
+//
+//            }
+//        }
+//
+//    }
+//
+//    if (counts ==0) return 0.0; // to avoid division by zero
+//    return total/counts; //returns the average
+//}
+//
 // this method calculates the average of the elective subject grades; same logic as calculating the average of core subjects
-public double calculateElectiveAverage(String studentId){
-    double total = 0;
-    int counts = 0;
-    for (int i = 0; i < gradeCount; i++) {
-        if (grades[i].getStudentId().equals(studentId)) {
-            if (grades[i].getSubject() instanceof ElectiveSubject) {
-                total += grades[i].getGrade();
-                counts++;
-            }
-        }
-    }
-    if (counts ==0) return 0.0;
-    return total/counts;
-}
+//public double calculateElectiveAverage(String studentId){
+//    double total = 0;
+//    int counts = 0;
+//    for (int i = 0; i < gradeCount; i++) {
+//        if (grades[i].getStudentId().equals(studentId)) {
+//            if (grades[i].getSubject() instanceof ElectiveSubject) {
+//                total += grades[i].getGrade();
+//                counts++;
+//            }
+//        }
+//    }
+//    if (counts ==0) return 0.0;
+//    return total/counts;
+//}
 
 //this method calculates overall average(all subjects)
 public double calculateOverallAverage(String studentId) {

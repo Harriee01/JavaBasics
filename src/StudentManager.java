@@ -73,15 +73,34 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         InputValidator.validateStudentId(student.getStudentId());
     }
 
-    // this method finds a student by ID
-    public Student findStudent(String studentId) {
-        for (int i = 0; i < studentCount; i++) {//looping through all the students
-            if (students[i].getStudentId().equals(studentId)) {//checking if the current student's ID is a match
-                return students[i];// found so it returns the student
+    // finds a student by their ID and throws an exception if a student is not found instead of null
+    public Student findStudent(String studentId) throws StudentNotFoundException {
+        AppLogger.enter("findStudent");
+
+        try {
+            Student student = findStudentById(studentId);
+            if (student == null) {
+                AppLogger.warning("Student not found: ID=" + studentId);
+                throw new StudentNotFoundException(studentId);
             }
+
+            AppLogger.debug("Student found: ID=" + studentId);
+            return student;
+
+        } finally {
+            AppLogger.exit("findStudent");
         }
-        return null;// not found so it returns null
     }
+
+//    // this method finds a student by ID
+//    public Student findStudent(String studentId) {
+//        for (int i = 0; i < studentCount; i++) {//looping through all the students
+//            if (students[i].getStudentId().equals(studentId)) {//checking if the current student's ID is a match
+//                return students[i];// found so it returns the student
+//            }
+//        }
+//        return null;// not found so it returns null
+//    }
 
     // this method searches students by name (partial match)
     // returns array of matching students

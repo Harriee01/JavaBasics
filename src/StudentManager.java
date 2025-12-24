@@ -30,16 +30,39 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
     }
 
 
-    // this method adds a student to the array
-    public void addStudent(Student student) {
-        if (studentCount < students.length) {// checking if the array is not full
-            students[studentCount] = student;// the student is added at the next available position
-            student.setGradeManager(gradeManager);// the gradeManager reference for the student is set
-            studentCount++;// increment count
-        } else {
-            System.out.println("Student storage is full.");
+    // this method adds a student to the list with validation
+    // It throws exceptions instead of returning boolean for cleaner error handling
+    public void addStudent(Student student) throws DuplicateStudentException, ValidationException{
+        AppLogger.enter("addStudent");
+
+        try{
+            // Validate student data before adding
+            validateStudentData(student);
+
+            // Check for duplicate student ID
+            if (findStudentById(student.getStudentId()) != null) {
+                throw new DuplicateStudentException(student.getStudentId());
+            }
+
+            // Add student to list
+            students.add(student);
+            AppLogger.info("Student added: ID=" + student.getStudentId() +
+                    ", Name=" + student.getStudentName() +
+                    ", Type=" + student.getStudentType());
+
+        }finally {
+            AppLogger.exit("addStudent");
         }
-    }
+
+
+//        if (studentCount < students.length) {// checking if the array is not full
+//            students[studentCount] = student;// the student is added at the next available position
+//            student.setGradeManager(gradeManager);// the gradeManager reference for the student is set
+//            studentCount++;// increment count
+//        } else {
+//            System.out.println("Student storage is full.");
+//        }
+}
 
     // this method finds a student by ID
     public Student findStudent(String studentId) {

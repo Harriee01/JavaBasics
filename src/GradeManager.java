@@ -35,6 +35,15 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         }
     }
 
+    //this method removes existing grade for same student and subject to prevent duplicate grades for same subject
+    private void removeExistingGrade(String studentId, Subject subject) {
+        // Find and remove any existing grade for this student and subject
+        grades.removeIf(grade ->
+                grade.getStudentId().equals(studentId) &&
+                        grade.getSubject().getSubjectCode().equals(subject.getSubjectCode())
+        );
+    }
+
 
 //method to get all grades for a specific student
 public Grade[] viewGradesByStudent(String studentId) {

@@ -3,17 +3,17 @@ import java.util.List;
 
 /**
  * Refactored StudentManager following SOLID principles:
- * - Single Responsibility: Only manages student operations
- * - Open/Closed: Open for extension via interfaces
- * - Liskov Substitution: Works with any Student subclass
- * - Interface Segregation: Uses specific interfaces
- * - Dependency Inversion: Depends on abstractions (List instead of array)
+ *  Single Responsibility: Only manages student operations
+ *  Open/Closed: Open for extension via interfaces
+ *  Liskov Substitution: Works with any Student subclass
+ *  Interface Segregation: Uses specific interfaces
+ *  Dependency Inversion: Depends on abstractions (List instead of array)
  */
 
 public class StudentManager {// uses composition(it HAS-A array of Students); manages all students in the system
     //private fields specific to StudentManager for managing students
     private List<Student> students;   // Changed from array to List for flexibility (Open/Closed Principle)
-    private int studentCount;    // tracks number of current registered students
+//    private int studentCount;    // tracks number of current registered students
 
     //**referencing the GradeManager class for the sake of calculating averages
     private GradeManager gradeManager;
@@ -53,8 +53,6 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         }finally {
             AppLogger.exit("addStudent");
         }
-
-
 //        if (studentCount < students.length) {// checking if the array is not full
 //            students[studentCount] = student;// the student is added at the next available position
 //            student.setGradeManager(gradeManager);// the gradeManager reference for the student is set
@@ -63,6 +61,17 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 //            System.out.println("Student storage is full.");
 //        }
 }
+
+    // This method validates all student data before adding  to system
+    // A separate method for Single Responsibility.
+    private void validateStudentData(Student student) throws ValidationException {
+        // Validate all student fields using InputValidator
+        InputValidator.validateName(student.getStudentName());
+        InputValidator.validateAge(student.getStudentAge());
+        InputValidator.validateEmail(student.getStudentEmail());
+        InputValidator.validatePhone(student.getStudentPhone());
+        InputValidator.validateStudentId(student.getStudentId());
+    }
 
     // this method finds a student by ID
     public Student findStudent(String studentId) {

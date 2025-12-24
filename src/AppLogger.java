@@ -60,5 +60,10 @@ public class AppLogger {
         logger.severe(message);
     }
 
+     // Logs an error message with exception details
+    public static void error(String message, Exception e) {
+        logger.log(Level.SEVERE, message, e);
+    }
+
 
 }

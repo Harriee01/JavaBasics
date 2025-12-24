@@ -53,13 +53,7 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         }finally {
             AppLogger.exit("addStudent");
         }
-//        if (studentCount < students.length) {// checking if the array is not full
-//            students[studentCount] = student;// the student is added at the next available position
-//            student.setGradeManager(gradeManager);// the gradeManager reference for the student is set
-//            studentCount++;// increment count
-//        } else {
-//            System.out.println("Student storage is full.");
-//        }
+
 }
 
     // This method validates all student data before adding  to system
@@ -101,19 +95,34 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
                 .findFirst()
                 .orElse(null); // Return null if not found
     }
-//    // this method finds a student by ID
-//    public Student findStudent(String studentId) {
-//        for (int i = 0; i < studentCount; i++) {//looping through all the students
-//            if (students[i].getStudentId().equals(studentId)) {//checking if the current student's ID is a match
-//                return students[i];// found so it returns the student
-//            }
-//        }
-//        return null;// not found so it returns null
-//    }
 
     // returns a copy of all students in the system to maintain encapsulation
     public List<Student> getAllStudents() {
         return new ArrayList<>(students); // Defensive copy
+    }
+
+    // this method displays all students in the system
+    public void viewAllStudents() {
+
+        AppLogger.enter("viewAllStudents");
+        System.out.println("=== ALL STUDENTS ===");
+        System.out.println("Total Students: " + students.size());
+        System.out.println();
+
+        if (students.isEmpty()) {
+            System.out.println("No students registered yet.");
+            AppLogger.info("No students to display.");
+            return;
+        }
+
+        // using an enhanced for loop for cleaner syntax
+        for (Student student : students) {
+            student.displayStudentDetails();
+            System.out.println();
+        }
+
+        AppLogger.info("Displayed " + students.size() + " students.");
+        AppLogger.exit("viewAllStudents");
     }
 
     // this method searches students by name (partial match)
@@ -187,48 +196,6 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return matches;
     }
 
-
-    // this method displays all students
-    public void viewAllStudents() {
-        if (studentCount == 0) {//checking if there are any students
-            System.out.println("No students registered.");
-            return;
-        }
-
-        System.out.println("\n=== Student List ===");
-        //looping through to display each student
-        for (int i = 0; i < studentCount; i++) {
-            Student student = students[i];
-            double avgGrade = student.calculateAverageGrade();//calculates actual average grade for the student
-            String statusText = avgGrade ==0 ? "Active": (student.isPassing() ? "Passed" : "Failed");
-            System.out.println("----------------------------------");
-            System.out.println("ID: " + student.getStudentId());
-            System.out.println("Name: " + student.getStudentName());
-            System.out.println("Type: " + student.getStudentType());
-            System.out.println("Average Grade: " + avgGrade);
-            System.out.println("Passing Grade: " + student.getPassingGrade());
-            System.out.println("Status: " + statusText);
-
-            // showing additional information for Honors students
-            if (student instanceof HonorsStudent) {
-                HonorsStudent honorsStudent01 = (HonorsStudent) student;  // Type casting
-                // counting enrolled subjects (grades) for the student
-                int enrolledSubjects = gradeManager.getGradeCountForStudent(student.getStudentId());
-                System.out.println("           | Enrolled Subjects: " + enrolledSubjects +
-                        " | Passing Grade: " + student.getPassingGrade() + "% | Honors Eligible");
-            } else {
-                // counting enrolled subjects for regular student
-                int enrolledSubjects = gradeManager.getGradeCountForStudent(student.getStudentId());
-                System.out.println("           | Enrolled Subjects: " + enrolledSubjects +
-                        " | Passing Grade: " + student.getPassingGrade() + "%");
-            }
-            System.out.println("----------------------------------");
-        }
-
-
-        System.out.println("\nTotal Students: " + getStudentCount());
-        System.out.println("Class Average: " + getAverageClassGrade());
-    }
 
     //this method calculates the average grade of all students
     public double getAverageClassGrade() {

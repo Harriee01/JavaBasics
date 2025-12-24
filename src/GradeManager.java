@@ -1,7 +1,17 @@
+import java.util.ArrayList;
+import java.util.List;
+
+// refactored GradeManager following SOLID principles
 public class GradeManager {// uses composition; manages all the grades in the system
 
-private Grade[] grades = new Grade[200];  // Array to store all grades with length 200
-private int gradeCount = 0;               // Tracks how many grades have been added, starting with zero
+    private List<Grade> grades; // Changed from array to List for flexibility
+
+    // This constructor initializes an empty grade list.
+    public GradeManager() {
+        this.grades = new ArrayList<>(); // Using List interface
+        AppLogger.info("GradeManager initialized with empty grade list.");
+    }
+
 
 // Method to add a grade to the array
 public void addGrade(Grade grade) {

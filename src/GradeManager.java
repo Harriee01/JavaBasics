@@ -63,27 +63,46 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         return studentGrades;
     }
 
+    // this method displays all grades for a specific student
+    public void viewGradesByStudent(String studentId) throws StudentNotFoundException {
+        List<Grade> studentGrades = getGradesByStudent(studentId);
+
+        System.out.println("=== Grades for Student: " + studentId + " ===");
+
+        if (studentGrades.isEmpty()) {
+            System.out.println("No grades found for this student.");
+        } else {
+            for (Grade grade : studentGrades) {
+                grade.displayGradeDetails();
+                System.out.println();
+            }
+        }
+
+        System.out.println("==================================");
+        AppLogger.info("Displayed grades for student: " + studentId);
+    }
+
 
 //method to get all grades for a specific student
-public Grade[] viewGradesByStudent(String studentId) {
-    int count = 0;//counting how many grades a particular student has
-    for (int i = 0; i < gradeCount; i++) {
-        if (grades[i].getStudentId().equals(studentId)) {
-            count++;
-        }
-    }
-    // creating an array of the exact size needed for a student's grades
-    Grade[] studentGrades = new Grade[count];
-    int index = 0;
-    //filling the array with student's grades
-    for (int i = 0; i < gradeCount; i++) {
-        if (grades[i].getStudentId().equals(studentId)) {
-            studentGrades[index] = grades[i];
-            index++;
-        }
-    }
-    return studentGrades;
-}
+//public Grade[] viewGradesByStudent(String studentId) {
+//    int count = 0;//counting how many grades a particular student has
+//    for (int i = 0; i < gradeCount; i++) {
+//        if (grades[i].getStudentId().equals(studentId)) {
+//            count++;
+//        }
+//    }
+//    // creating an array of the exact size needed for a student's grades
+//    Grade[] studentGrades = new Grade[count];
+//    int index = 0;
+//    //filling the array with student's grades
+//    for (int i = 0; i < gradeCount; i++) {
+//        if (grades[i].getStudentId().equals(studentId)) {
+//            studentGrades[index] = grades[i];
+//            index++;
+//        }
+//    }
+//    return studentGrades;
+//}
 
 
 // This method calculates the average of the core subject grades

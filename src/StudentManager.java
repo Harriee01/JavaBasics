@@ -161,10 +161,7 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return students.size();
     }
 
-    /**
-     * Searches for students by name (partial matching, case-insensitive).
-     * New feature for Fold 2.
-     */
+    // this method searches for students by name (partial matching, case-insensitive)
     public List<Student> searchByName(String partialName) {
         AppLogger.enter("searchByName");
 
@@ -184,51 +181,59 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return results;
     }
 
+    // this method searches for students by type (Regular or Honors)
+    public List<Student> searchByType(String type) {
+        AppLogger.enter("searchByType");
 
-    //this method searches students by type (Regular or Honors)
-    public Student[] searchByType(String type) {
-        int matchCount = 0;
-        for (int i = 0; i < studentCount; i++) {
-            if (students[i].matchesType(type)) {
-                matchCount++;
+        List<Student> results = new ArrayList<>();
+        String searchTerm = type.toLowerCase();
+
+        for (Student student : students) {
+            if (student.getStudentType().toLowerCase().contains(searchTerm)) {
+                results.add(student);
             }
         }
 
-        Student[] matches = new Student[matchCount];
-        int index = 0;
+        AppLogger.info("Type search for ' " + type + " ' found" + results.size() + " results. ");
+        AppLogger.exit("searchByType");
 
-        for (int i = 0; i < studentCount; i++) {
-            if (students[i].matchesType(type)) {
-                matches[index++] = students[i];
-            }
-        }
+        return results;
 
-        return matches;
     }
 
     // this method searches students by grade range
     // for instance minGrade=80, maxGrade=90 finds students with 80-90% average
-    public Student[] searchByGradeRange(double minGrade, double maxGrade) {
-        int matchCount = 0;
-        for (int i = 0; i < studentCount; i++) {
-            double avg = students[i].calculateAverageGrade();
-            if (avg >= minGrade && avg <= maxGrade) {
-                matchCount++;
+    public List<Student> searchByGradeRange(double minGrade, double maxGrade) {
+        AppLogger.enter("searchByGradeRange");
+
+        List<Student> results = new ArrayList<>();
+        // Validate input range
+        if (minGrade < 0 || maxGrade > 100 || minGrade > maxGrade) {
+            AppLogger.warning("Invalid grade range: " + minGrade + " - " + maxGrade);
+            return results; // return empty list
+        }
+
+        // Filter students by average grade
+        for (Student student : students) {
+            double average = student.calculateAverageGrade();
+
+            // Only include students who actually have grades
+            if (average > 0 && average >= minGrade && average <= maxGrade) {
+                results.add(student);
             }
         }
 
-        Student[] matches = new Student[matchCount];
-        int index = 0;
+        AppLogger.info(
+                "Grade range search (" + minGrade + "–" + maxGrade +
+                        ") found " + results.size() + " students."
+        );
 
-        for (int i = 0; i < studentCount; i++) {
-            double avg = students[i].calculateAverageGrade();
-            if (avg >= minGrade && avg <= maxGrade) {
-                matches[index++] = students[i];
-            }
-        }
+        AppLogger.exit("searchStudentsByGradeRange");
+        return results;
 
-        return matches;
     }
+
 }
+
 
 

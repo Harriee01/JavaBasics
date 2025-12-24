@@ -84,12 +84,11 @@ public class InputValidator {
         }
     }
 
-
-
-
-
-
-
-
+     //Validates that a string is not null or empty
+    public static void validateNotEmpty(String value, String fieldName) throws ValidationException {
+        if (value == null || value.trim().isEmpty()) {
+            throw new ValidationException(fieldName + " cannot be empty.");
+        }
+    }
 
 }

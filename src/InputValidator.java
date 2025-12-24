@@ -43,6 +43,32 @@ public class InputValidator {
         }
     }
 
+    //Validates a student ID format (STU followed by 3 digits).
+    public static void validateStudentId(String studentId) throws ValidationException {
+        if (studentId == null || studentId.trim().isEmpty()) {
+            throw new ValidationException("Student ID cannot be empty.");
+        }
+
+        if (!STUDENT_ID_PATTERN.matcher(studentId).matches()) {
+            throw new ValidationException("Student ID must be in format STU001, STU002, etc.");
+        }
+    }
+
+    //Validates a student's name.
+    public static void validateName(String name) throws ValidationException {
+        if (name == null || name.trim().isEmpty()) {
+            throw new ValidationException("Name cannot be empty.");
+        }
+
+        if (!NAME_PATTERN.matcher(name).matches()) {
+            throw new ValidationException("Name must contain only letters and spaces (2-50 characters).");
+        }
+    }
+
+
+
+
+
 
 
 

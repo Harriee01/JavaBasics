@@ -45,4 +45,20 @@ public class AppLogger {
     }
 
 
+     //Logs an informational message
+    public static void info(String message) {
+        logger.info(message);
+    }
+
+    //Logs a warning message
+    public static void warning(String message) {
+        logger.warning(message);
+    }
+
+    //Logs an error message
+    public static void error(String message) {
+        logger.severe(message);
+    }
+
+
 }

@@ -20,7 +20,7 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
     //this constructor creates an empty student list
     public StudentManager() {
-       this.students = new ArrayList<>();  // using List interface (Dependency inversion)
+        this.students = new ArrayList<>();  // using List interface (Dependency inversion)
         AppLogger.info("Student Manager initialized with empty student list");
     }
 
@@ -32,10 +32,10 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
     // this method adds a student to the list with validation
     // It throws exceptions instead of returning boolean for cleaner error handling
-    public void addStudent(Student student) throws DuplicateStudentException, ValidationException{
+    public void addStudent(Student student) throws DuplicateStudentException, ValidationException {
         AppLogger.enter("addStudent");
 
-        try{
+        try {
             // Validate student data before adding
             validateStudentData(student);
 
@@ -50,11 +50,11 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
                     ", Name=" + student.getStudentName() +
                     ", Type=" + student.getStudentType());
 
-        }finally {
+        } finally {
             AppLogger.exit("addStudent");
         }
 
-}
+    }
 
     // This method validates all student data before adding  to system
     // A separate method for Single Responsibility.
@@ -156,6 +156,12 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return classAverage;
     }
 
+
+    // returns the number of students in the system
+    public int getStudentCount() {
+        return students.size();
+    }
+
     // this method searches students by name (partial match)
     // returns array of matching students
     public Student[] searchByName(String name) {
@@ -226,19 +232,6 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
         return matches;
     }
-
-    // this method returns the total number of students
-    public int getStudentCount() {
-        return studentCount;
-    }
-
-    //this method gets all students (for statistics)
-//    public Student[] getAllStudents() {
-//        Student[] allStudents = new Student[studentCount];
-//        for (int i = 0; i < studentCount; i++) {
-//            allStudents[i] = students[i];
-//        }
-//        return allStudents;
-//    }
 }
+
 

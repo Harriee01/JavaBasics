@@ -101,6 +101,7 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         return new ArrayList<>(students); // Defensive copy
     }
 
+
     // this method displays all students in the system
     public void viewAllStudents() {
 
@@ -123,6 +124,36 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
         AppLogger.info("Displayed " + students.size() + " students.");
         AppLogger.exit("viewAllStudents");
+    }
+
+    // this method calculates the average grade for the entire class
+    public double getAverageClassGrade() {
+        AppLogger.enter("getAverageClassGrade");
+
+        if (students.isEmpty()) {
+            AppLogger.debug("No students, returning 0.0");
+            return 0.0;
+        }
+
+        double totalAverage = 0.0;
+        int studentsWithGrades = 0;
+
+        // calculating the average for each student
+        for (Student student : students) {
+            double studentAverage = student.calculateAverageGrade();
+
+            // only includes students who have grades
+            if (studentAverage > 0) {
+                totalAverage += studentAverage;
+                studentsWithGrades++;
+            }
+        }
+
+        double classAverage = studentsWithGrades > 0 ? totalAverage / studentsWithGrades : 0.0;
+        AppLogger.debug("Class average calculated: " + classAverage);
+        AppLogger.exit("getAverageClassGrade");
+
+        return classAverage;
     }
 
     // this method searches students by name (partial match)
@@ -194,28 +225,6 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         }
 
         return matches;
-    }
-
-
-    //this method calculates the average grade of all students
-    public double getAverageClassGrade() {
-        if (studentCount == 0){ //checking if there are no students
-            return 0.0;
-        }
-        double totalAverage = 0.0;// the sum of all student averages
-        int countStudentsWithGrades = 0;//takes the count of students who have grades
-        for (int i = 0; i < studentCount; i++) {//looping through all the students and summing their averages
-            double studentAvg = students[i].calculateAverageGrade();
-            if (studentAvg > 0) {// only count students who have at least one grade
-                totalAverage += studentAvg;
-                countStudentsWithGrades++;
-            }
-        }
-        if(countStudentsWithGrades == 0){//avoiding division by zero
-            return 0.0;
-        }
-
-        return totalAverage / countStudentsWithGrades;// return the average of all student averages
     }
 
     // this method returns the total number of students

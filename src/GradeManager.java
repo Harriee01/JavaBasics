@@ -12,16 +12,29 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         AppLogger.info("GradeManager initialized with empty grade list.");
     }
 
+    // this method adds a new grade to the system with validation
+    public void addGrade(Grade grade) throws InvalidGradeException, ValidationException {
+        AppLogger.enter("addGrade");
 
-// Method to add a grade to the array
-public void addGrade(Grade grade) {
-    if (gradeCount < grades.length) {
-        grades[gradeCount] = grade;// add grade
-        gradeCount++;//increment count
-    } else {
-        System.out.println("Grade storage is full.");
+        try {
+            // Validate grade value
+            InputValidator.validateGrade(grade.getGradeValue());
+
+            // Check for existing grade for same student and subject
+            removeExistingGrade(grade.getStudentId(), grade.getSubject());
+
+            // Add grade to list
+            grades.add(grade);
+            AppLogger.info("Grade added: ID=" + grade.getGradeId() +
+                    ", Student=" + grade.getStudentId() +
+                    ", Subject=" + grade.getSubject().getSubjectCode() +
+                    ", Grade=" + grade.getGradeValue());
+
+        } finally {
+            AppLogger.exit("addGrade");
+        }
     }
-}
+
 
 //method to get all grades for a specific student
 public Grade[] viewGradesByStudent(String studentId) {

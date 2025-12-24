@@ -128,60 +128,41 @@ public class GradeManager {// uses composition; manages all the grades in the sy
         return average;
     }
 
-// This method calculates the average of the core subject grades
-//public double calculateCoreAverage(String studentId) {
-//    double total = 0; //sum of all core grades
-//    int counts = 0; //number of core subjects
-//
-//    //Looping through all grades
-//    for (int i = 0; i < gradeCount; i++) {
-//        //Nested if statement to check if a grade belongs to the student in question and whether the subject is a core subject
-//        if (grades[i].getStudentId().equals(studentId)) {
-//            if (grades[i].getSubject() instanceof CoreSubject) {
-//                total += grades[i].getGrade();
-//                counts++;
-//
-//
-//            }
-//        }
-//
-//    }
-//
-//    if (counts ==0) return 0.0; // to avoid division by zero
-//    return total/counts; //returns the average
-//}
-//
-// this method calculates the average of the elective subject grades; same logic as calculating the average of core subjects
-//public double calculateElectiveAverage(String studentId){
-//    double total = 0;
-//    int counts = 0;
-//    for (int i = 0; i < gradeCount; i++) {
-//        if (grades[i].getStudentId().equals(studentId)) {
-//            if (grades[i].getSubject() instanceof ElectiveSubject) {
-//                total += grades[i].getGrade();
-//                counts++;
-//            }
-//        }
-//    }
-//    if (counts ==0) return 0.0;
-//    return total/counts;
-//}
+    // this method calculates overall average grade for a student for all subjects
+    public double calculateOverallAverage(String studentId) throws StudentNotFoundException {
+        AppLogger.enter("calculateOverallAverage");
+
+        List<Grade> studentGrades = getGradesByStudent(studentId);
+        double total = 0.0;
+        int count = studentGrades.size();
+
+        // Sum all grades
+        for (Grade grade : studentGrades) {
+            total += grade.getGradeValue();
+        }
+
+        double average = count > 0 ? total / count : 0.0;
+        AppLogger.debug("Overall average for " + studentId + ": " + average);
+        AppLogger.exit("calculateOverallAverage");
+
+        return average;
+    }
 
 //this method calculates overall average(all subjects)
-public double calculateOverallAverage(String studentId) {
-    double total = 0;
-    int count = 0;
-
-    for (int i = 0; i < gradeCount; i++) {
-        if (grades[i].getStudentId().equals(studentId)) {
-            total += grades[i].getGrade();
-            count++;
-        }
-    }
-
-    if (count == 0) return 0.0;
-    return total / count;
-    }
+//public double calculateOverallAverage(String studentId) {
+//    double total = 0;
+//    int count = 0;
+//
+//    for (int i = 0; i < gradeCount; i++) {
+//        if (grades[i].getStudentId().equals(studentId)) {
+//            total += grades[i].getGrade();
+//            count++;
+//        }
+//    }
+//
+//    if (count == 0) return 0.0;
+//    return total / count;
+//    }
 
     //this method get the count of grades for a specific student
     public int getGradeCountForStudent(String studentId) {

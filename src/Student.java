@@ -148,8 +148,25 @@ public abstract class Student implements Serializable, Gradable {
         return studentId.hashCode();
     }
 
+    // to string method for debugging
 
+    //Returns string representation of student for debugging.
+    @Override
+    public String toString() {
+        return String.format("Student{id=%s, name='%s', type=%s, status=%s}",
+                studentId, studentName, studentType, studentStatus);
+    }
 
+    // static methods for ID management
 
+    //Returns the next available student ID without incrementing counter for previewing what the next ID will be
+    public static String getNextStudentId() {
+        return String.format("STU%04d", studentCounter.get() + 1);
+    }
 
+    //Resets the student counter (for testing purposes only).
+     //Package-private to prevent misuse.
+    static void resetCounterForTesting() {
+        studentCounter.set(1000);
+    }
 }

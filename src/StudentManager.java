@@ -2,21 +2,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Refactored StudentManager following SOLID principles:
- *  Single Responsibility: Only manages student operations
- *  Open/Closed: Open for extension via interfaces
- *  Liskov Substitution: Works with any Student subclass
- *  Interface Segregation: Uses specific interfaces
- *  Dependency Inversion: Depends on abstractions (List instead of array)
+ * Enhanced StudentManager using optimized Java Collections.
+ * Replaces List with HashMap for O(1) lookup and TreeMap for sorted operations.
+ * Implements thread-safe operations with ConcurrentHashMap.
  */
 
 public class StudentManager {// uses composition(it HAS-A array of Students); manages all students in the system
     //private fields specific to StudentManager for managing students
-    private List<Student> students;   // Changed from array to List for flexibility (Open/Closed Principle)
-//    private int studentCount;    // tracks number of current registered students
+    // PRIMARY COLLECTION: ConcurrentHashMap for thread-safe O(1) lookups
+    // Key: studentId (String), Value: Student object
+    // Using ConcurrentHashMap instead of HashMap for thread safety
+    private final Map<String, Student> studentMap;
 
-    //**referencing the GradeManager class for the sake of calculating averages
-    private GradeManager gradeManager;
+    // SECONDARY COLLECTION: TreeMap for sorted operations by student ID
+    // Automatically maintains students in sorted order by key (studentId)
+    private final SortedMap<String, Student> sortedStudentMap;
+
+    // SET for tracking unique email addresses (prevents duplicate emails)
+    // Using HashSet for O(1) membership checks
+    private final Set<String> emailRegistry;
+
+    // Performance monitoring: track operation times
+    private long lastAddStudentTime;
+    private long lastFindStudentTime;
+
 
     //this constructor creates an empty student list
     public StudentManager() {

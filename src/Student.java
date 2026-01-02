@@ -120,6 +120,35 @@ public abstract class Student implements Serializable, Gradable {
     }
 
 
+    // Abstract methods that will be implemented by subclasses
+
+    //Returns the minimum passing grade for this student type
+    public abstract double getPassingGrade();
+
+    //Displays student details in a formatted way.
+    public abstract void displayStudentDetails();
+
+    //Checks if the student is passing based on their average grade.
+    public abstract boolean isPassing(double currentAverage);
+
+    // Equals and hashcode for collection optimization
+
+    //Students are equal if they have the same studentId important for HashMap/HashSet operations
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Student student = (Student) obj;
+        return studentId.equals(student.studentId);
+    }
+
+    //HashCode based on studentId for efficient HashMap operations, consistent with equals() method.
+    @Override
+    public int hashCode() {
+        return studentId.hashCode();
+    }
+
+
 
 
 

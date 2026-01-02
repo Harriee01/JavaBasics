@@ -106,5 +106,21 @@ public abstract class Student implements Serializable, Gradable {
 
 
 
+    //Gradable interface implementation
+    //Validates if a grade is within acceptable range (0-100).
+    @Override
+    public boolean validateGrade(double grade) {
+        return grade >= 0 && grade <= 100;
+    }
+
+    //Records a grade (placeholder - actual recording  is done by GradeManager) .Returns true if grade is valid.
+    @Override
+    public boolean recordGrade(double grade) {
+        return validateGrade(grade);
+    }
+
+
+
+
 
 }

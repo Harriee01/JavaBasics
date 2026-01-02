@@ -1,104 +1,28 @@
-import java.util.ArrayList;// used to import Java's ArrayList class to store lists of grades
+import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class Student implements Gradable, Exportable, Searchable, Calculable { // Student class is abstract because it cannot be instantiated and is used as the parent class for all student types
-    //all the fields are private so that they can be modified and accessed only within this abstract class
-    // it also implements the Gradable interface and provides (a must) for the methods stated in the interface
-    // now it also implements multiple interfaces,that is exportable, searchable and calculable
+//Implements Serializable for binary export, follows SOLID principles and designed for thread-safe operations.
+public abstract class Student implements Serializable, Gradable {
+    // Serializable marker for binary export
+    private static final long serialVersionUID = 1L;
 
-    private String studentId; //unique student ID
-    private String studentName; // Student's full name
-    private String studentEmail;// Student's email address
-    private String studentPhone;//Student's phone number
-    private int studentAge; // Student's age
-    private String studentStatus; // Student's current status be it active or inactive
-    private static int studentCounter = 1; //  static counter to generate the unique student IDs
+    // AtomicInteger is used for thread-safe ID generation
+    private static final AtomicInteger studentCounter = new AtomicInteger(1000);
 
-    //running totals for average calculation
-    // private double totalGrades = 0.0;
-    //private int gradeCount = 0;
-    // protected ArrayList<Double> grades = new ArrayList<>(); // this list is for storing the grades of a student
+    // Final fields for immutability (Thread safety)
+    private final String studentId;           // Immutable unique identifier
+    private final String studentType;         // Immutable student type
 
-    //referencing GradeManager which is needed to calculate averages; it will be set from the main class
-    protected GradeManager gradeManager;
+    // Mutable fields with proper encapsulation
+    private String studentName;
+    private String studentEmail;
+    private String studentPhone;
+    private int studentAge;
+    private String studentStatus;
 
+    // No GradeManager dependency (Dependency Inversion Principle)
+    // No search logic in entity (Single Responsibility Principle)
+    // No export logic in entity (Interface Segregation Principle)
 
-    // Constructor to initialize a new Student object
-    public Student(String studentName, String studentEmail, String studentPhone, int studentAge) {
-        studentCounter++; //increments counter for every new student
-        this.studentId = String.format("STU" + studentCounter);
-        this.studentName = studentName;
-        this.studentEmail = studentEmail;
-        this.studentPhone = studentPhone;
-        this.studentAge = studentAge;
-        this.studentStatus = "ACTIVE"; // the default status for every new student
-    }
-
-    //Getter methods to read private fields
-    public String getStudentId() {return studentId;}
-    public String getStudentName() {return studentName;}
-    public String getStudentEmail() {return studentEmail;}
-    public String getStudentPhone() {return studentPhone;}
-    public int getStudentAge() {return studentAge;}
-    public String getStudentStatus() {return studentStatus;}
-
-    //Setter methods to allow other classes modify private fields
-    public void setStudentName(String studentName){this.studentName = studentName;}
-    public void setStudentEmail(String studentEmail){this.studentEmail = studentEmail;}
-    public void setStudentPhone(String studentPhone){this.studentPhone = studentPhone;}
-    public void setStudentAge(int studentAge){this.studentAge = studentAge;}
-    public void setStudentStatus(String studentStatus){this.studentStatus = studentStatus;}
-
-    //this method sets the GradeManager reference
-    public void setGradeManager(GradeManager gradesManager){this.gradeManager = gradesManager;}
-
-    //implementing the Gradable interface method, validateGrade to validate if a grade is between 0 and 100
-    @Override
-    public boolean validateGrade(double grade) {
-        return grade >= 0 && grade <= 100; //returns true if valid, false if not
-    }
-
-    //implementing the Gradable interface method, recordGrade to record a grade(used as a placeholder for now)
-    @Override
-    public boolean recordGrade(double grade){
-        //checking if grade is valid before recording
-        if (validateGrade(grade)) {
-            return true; // grade is valid and can be recorded
-        }
-        return false;
-    }
-    // implementing the Searchable interface - this allows searching students
-    @Override
-    public boolean matchesId(String id) {
-        // exact match for ID (case-insensitive)
-        return this.studentId.equalsIgnoreCase(id);
-    }
-
-    @Override
-    public boolean matchesName(String name) {
-        // partial match for name (case-insensitive)
-        //for instance, when searching "john" matches "John Smith" or "Alice Johnson"
-        return this.studentName.toLowerCase().contains(name.toLowerCase());
-    }
-
-    @Override
-    public boolean matchesType(String type) {
-        //this checks if student type matches search criteria
-        return this.getStudentType().equalsIgnoreCase(type);
-    }
-
-    // implementing Calculable interface
-    @Override
-    public double calculateAverage() {
-        if (gradeManager == null) return 0.0;
-        return gradeManager.calculateOverallAverage(studentId);
-    }
-
-
-    //Abstract methods that must be implemented in subclasses
-    public abstract double getPassingGrade();// returns the minimum passing grade
-    public abstract String getStudentType();//returns the type of student, whether regular or honors
-    public abstract void displayStudentDetails();// shows the student information
-    public abstract double calculateAverageGrade();// calculates the average of all the grades
-    public abstract boolean isPassing();// checks if the student is passing
 
 }

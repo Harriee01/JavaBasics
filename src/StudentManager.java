@@ -1,5 +1,6 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Enhanced StudentManager using optimized Java Collections.
@@ -22,48 +23,88 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
     // Using HashSet for O(1) membership checks
     private final Set<String> emailRegistry;
 
-    // Performance monitoring: track operation times
+    // Performance monitoring to track operation times
     private long lastAddStudentTime;
     private long lastFindStudentTime;
 
 
-    //this constructor creates an empty student list
+    //this constructor initializes all collections, it also uses ConcurrentHashMap for thread safety in the multi-threaded environment.
     public StudentManager() {
-        this.students = new ArrayList<>();  // using List interface (Dependency inversion)
-        AppLogger.info("Student Manager initialized with empty student list");
+        // ConcurrentHashMap: Thread-safe, high-concurrency hash table
+        this.studentMap = new ConcurrentHashMap<>();
+
+        // TreeMap: Red-Black tree implementation, maintains sorted order
+        // Wrapping with Collections.synchronizedSortedMap for thread safety
+        this.sortedStudentMap = Collections.synchronizedSortedMap(new TreeMap<>());
+
+        // HashSet: Fast O(1) add/remove/contains operations
+        // Wrapping with Collections.synchronizedSet for thread safety
+        this.emailRegistry = Collections.synchronizedSet(new HashSet<>());
+
+        this.lastAddStudentTime = 0;
+        this.lastFindStudentTime = 0;
+
+        AppLogger.info("StudentManager initialized with optimized collections.");
     }
 
     //**this method sets the  GradeManager reference
-    public void setGradeManager(GradeManager gradeManager01) {
-        this.gradeManager = gradeManager01;
-    }
+    //public void setGradeManager(GradeManager gradeManager01) {
+        //this.gradeManager = gradeManager01;
+    //}
 
 
-    // this method adds a student to the list with validation
-    // It throws exceptions instead of returning boolean for cleaner error handling
+    // this method adds a student with O(1) average time complexity.
+    // It throws exceptions instead of returning boolean for cleaner error handling and uses ConcurrentHashMap.putIfAbsent() for atomic thread-safe operation.
     public void addStudent(Student student) throws DuplicateStudentException, ValidationException {
         AppLogger.enter("addStudent");
 
         try {
-            // Validate student data before adding
+            // Validate student data before any operation
             validateStudentData(student);
 
-            // Check for duplicate student ID
-            if (findStudentById(student.getStudentId()) != null) {
-                throw new DuplicateStudentException(student.getStudentId());
+            String studentId = student.getStudentId();
+            String email = student.getStudentEmail();
+
+            // Thread-safe check for duplicate email using synchronized block
+            synchronized(emailRegistry) {
+                if (emailRegistry.contains(email)) {
+                    throw new DuplicateStudentException("Email '" + email + "' already registered.");
+                }
             }
 
-            // Add student to list
-            students.add(student);
-            AppLogger.info("Student added: ID=" + student.getStudentId() +
-                    ", Name=" + student.getStudentName() +
-                    ", Type=" + student.getStudentType());
+            // Thread-safe atomic operation: put if absent
+            // Returns null if key was absent, returns existing value if key exists
+            Student existing = studentMap.putIfAbsent(studentId, student);
+
+            if (existing != null) {
+                // Student ID already exists - rollback email registration
+                synchronized(emailRegistry) {
+                    emailRegistry.remove(email);
+                }
+                throw new DuplicateStudentException(studentId);
+            }
+
+            // Update secondary collections
+            synchronized(sortedStudentMap) {
+                sortedStudentMap.put(studentId, student);
+            }
+
+            synchronized(emailRegistry) {
+                emailRegistry.add(email);
+            }
+
+            // Performance logging
+            lastAddStudentTime = System.nanoTime() - startTime;
+            AppLogger.info(String.format(
+                    "Student added in %d ns: ID=%s, Name=%s, Type=%s",
+                    lastAddStudentTime, studentId, student.getStudentName(), student.getStudentType()
+            ));
 
         } finally {
             AppLogger.exit("addStudent");
         }
-
     }
+
 
     // This method validates all student data before adding  to system
     // A separate method for Single Responsibility.
@@ -76,18 +117,27 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
         InputValidator.validateStudentId(student.getStudentId());
     }
 
-    // finds a student by their ID and throws an exception if a student is not found instead of null
+    // finds a student by their ID with O(1) average time complexity and throws an exception if a student is not found instead of null
+    // ConcurrentHashMap.get() is used;  thread-safe for reads.
     public Student findStudent(String studentId) throws StudentNotFoundException {
+        long startTime = System.nanoTime(); // Start performance timer
         AppLogger.enter("findStudent");
 
         try {
-            Student student = findStudentById(studentId);
+            // O(1) lookup in ConcurrentHashMap
+            Student student = studentMap.get(studentId);
+
             if (student == null) {
                 AppLogger.warning("Student not found: ID=" + studentId);
                 throw new StudentNotFoundException(studentId);
             }
 
-            AppLogger.debug("Student found: ID=" + studentId);
+            // Performance logging
+            lastFindStudentTime = System.nanoTime() - startTime;
+            AppLogger.debug(String.format(
+                    "Student found in %d ns: ID=%s", lastFindStudentTime, studentId
+            ));
+
             return student;
 
         } finally {
@@ -97,18 +147,132 @@ public class StudentManager {// uses composition(it HAS-A array of Students); ma
 
     //internal method to find student by ID (returns null if not found)
     //Separated from public method for clarity
-    private Student findStudentById(String studentId) {
-        // using Java Stream API for cleaner code (functional programming)
-        return students.stream()
-                .filter(student -> student.getStudentId().equals(studentId))
-                .findFirst()
-                .orElse(null); // Return null if not found
+//    private Student findStudentById(String studentId) {
+//        // using Java Stream API for cleaner code (functional programming)
+//        return students.stream()
+//                .filter(student -> student.getStudentId().equals(studentId))
+//                .findFirst()
+//                .orElse(null); // Return null if not found
+//    }
+
+    // returns a copy of all students sorted by ID using TreeMap.
+    //  TreeMap maintains natural ordering of keys (student IDs) in the system
+    public List<Student> getAllStudentsSortedById() {
+        AppLogger.enter("getAllStudentsSortedById");
+
+        // TreeMap.values() returns values in key-sorted order
+        // Creating defensive copy to prevent external modification
+        List<Student> sortedStudents;
+        synchronized(sortedStudentMap) {
+            sortedStudents = new ArrayList<>(sortedStudentMap.values());
+        }
+
+        AppLogger.debug("Returned " + sortedStudents.size() + " students sorted by ID.");
+        AppLogger.exit("getAllStudentsSortedById");
+
+        return sortedStudents;
     }
 
-    // returns a copy of all students in the system to maintain encapsulation
-    public List<Student> getAllStudents() {
-        return new ArrayList<>(students); // Defensive copy
+    /**
+     * Returns students sorted by name using Stream API and Comparator.
+     * Demonstrates functional programming with Streams.
+     */
+    public List<Student> getAllStudentsSortedByName() {
+        AppLogger.enter("getAllStudentsSortedByName");
+
+        // Using Java Stream API for functional, declarative programming
+        List<Student> sortedStudents = studentMap.values().stream()
+                .sorted(Comparator.comparing(Student::getStudentName)) // Comparator for name sorting
+                .collect(Collectors.toList()); // Terminal operation to collect results
+
+        AppLogger.debug("Returned " + sortedStudents.size() + " students sorted by name.");
+        AppLogger.exit("getAllStudentsSortedByName");
+
+        return sortedStudents;
     }
+
+    /**
+     * Enhanced search with regex pattern matching.
+     * Searches both name and email using regular expressions.
+     */
+    public List<Student> searchStudentsWithRegex(String regexPattern, SearchField field)
+            throws ValidationException {
+
+        AppLogger.enter("searchStudentsWithRegex");
+
+        try {
+            // Validate regex pattern for safety
+            validateRegexPattern(regexPattern);
+
+            // Compile pattern once for efficiency
+            Pattern pattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
+            List<Student> results = new ArrayList<>();
+
+            // Choose search field
+            switch (field) {
+                case NAME:
+                    // Search in student names using regex
+                    for (Student student : studentMap.values()) {
+                        if (pattern.matcher(student.getStudentName()).find()) {
+                            results.add(student);
+                        }
+                    }
+                    break;
+
+                case EMAIL:
+                    // Search in student emails using regex
+                    // Example: ".*@university\\.edu$" finds all university emails
+                    for (Student student : studentMap.values()) {
+                        if (pattern.matcher(student.getStudentEmail()).find()) {
+                            results.add(student);
+                        }
+                    }
+                    break;
+
+                case ID:
+                    // Search in student IDs using regex
+                    for (Student student : studentMap.values()) {
+                        if (pattern.matcher(student.getStudentId()).find()) {
+                            results.add(student);
+                        }
+                    }
+                    break;
+            }
+
+            AppLogger.info(String.format(
+                    "Regex search '%s' on field %s found %d results",
+                    regexPattern, field, results.size()
+            ));
+
+            return results;
+
+        } catch (PatternSyntaxException e) {
+            throw new ValidationException("Invalid regex pattern: " + e.getMessage());
+        } finally {
+            AppLogger.exit("searchStudentsWithRegex");
+        }
+    }
+
+    /**
+     * Returns performance metrics for monitoring.
+     */
+    public Map<String, Long> getPerformanceMetrics() {
+        Map<String, Long> metrics = new HashMap<>();
+        metrics.put("lastAddStudentTime", lastAddStudentTime);
+        metrics.put("lastFindStudentTime", lastFindStudentTime);
+        metrics.put("studentCount", (long) studentMap.size());
+        metrics.put("emailRegistrySize", (long) emailRegistry.size());
+        return metrics;
+    }
+
+    /**
+     * Enum for search field types.
+     * Ensures type safety compared to using raw strings.
+     */
+    public enum SearchField {
+        NAME, EMAIL, ID
+    }
+
 
 
     // this method displays all students in the system

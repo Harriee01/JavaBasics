@@ -1,445 +1,376 @@
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 /**
- * Enhanced StudentManager using optimized Java Collections.
- * Replaces List with HashMap for O(1) lookup and TreeMap for sorted operations.
- * Implements thread-safe operations with ConcurrentHashMap.
+ * StudentManager that manages all students in the system.
+ * Uses optimized collections for better performance and thread safety.
  */
+public class StudentManager {
 
-public class StudentManager {// uses composition(it HAS-A array of Students); manages all students in the system
-    //private fields specific to StudentManager for managing students
-    // PRIMARY COLLECTION: ConcurrentHashMap for thread-safe O(1) lookups
-    // Key: studentId (String), Value: Student object
-    // Using ConcurrentHashMap instead of HashMap for thread safety
-    private final Map<String, Student> studentMap;
+    // main collections, the different ways to organize the student data
+    // 1. Primary storage - Fast lookup by student ID
+    // ConcurrentHashMap is thread-safe and fast
+    private final Map<String, Student> studentsById;
 
-    // SECONDARY COLLECTION: TreeMap for sorted operations by student ID
-    // Automatically maintains students in sorted order by key (studentId)
-    private final SortedMap<String, Student> sortedStudentMap;
+    // 2. Sorted by ID - For when we need students in ID order
+    // TreeMap keeps things sorted automatically
+    private final Map<String, Student> studentsSortedById;
 
-    // SET for tracking unique email addresses (prevents duplicate emails)
-    // Using HashSet for O(1) membership checks
-    private final Set<String> emailRegistry;
-
-    // Performance monitoring to track operation times
-    private long lastAddStudentTime;
-    private long lastFindStudentTime;
+    // 3. Index by email - To quickly check if email is already used
+    private final Set<String> registeredEmails;
 
 
-    //this constructor initializes all collections, it also uses ConcurrentHashMap for thread safety in the multi-threaded environment.
+    // Cache stores recent search results to avoid re-searching
+    private static class SimpleCache {
+        String key;                // What we searched for
+        List<Student> results;     // The search results
+        long timestamp;            // When we cached it
+
+        SimpleCache(String key, List<Student> results) {
+            this.key = key;
+            this.results = results;
+            this.timestamp = System.currentTimeMillis();
+        }
+
+        // Check if cache is still fresh (less than 30 seconds old)
+        boolean isFresh() {
+            return System.currentTimeMillis() - timestamp < 30000;
+        }
+    }
+
+    // Store our cache entries
+    private final Map<String, SimpleCache> searchCache = new HashMap<>();
+
+    // performance tracking
+    private long lastOperationTime = 0;
+    private int totalStudentsAdded = 0;
+    private int totalSearches = 0;
+
+    // constructor for initializing the StudentManager class
     public StudentManager() {
-        // ConcurrentHashMap: Thread-safe, high-concurrency hash table
-        this.studentMap = new ConcurrentHashMap<>();
+        // Initialize our collections
+        this.studentsById = new ConcurrentHashMap<>();
+        this.studentsSortedById = new TreeMap<>();
+        this.registeredEmails = ConcurrentHashMap.newKeySet();
 
-        // TreeMap: Red-Black tree implementation, maintains sorted order
-        // Wrapping with Collections.synchronizedSortedMap for thread safety
-        this.sortedStudentMap = Collections.synchronizedSortedMap(new TreeMap<>());
-
-        // HashSet: Fast O(1) add/remove/contains operations
-        // Wrapping with Collections.synchronizedSet for thread safety
-        this.emailRegistry = Collections.synchronizedSet(new HashSet<>());
-
-        this.lastAddStudentTime = 0;
-        this.lastFindStudentTime = 0;
-
-        AppLogger.info("StudentManager initialized with optimized collections.");
+        System.out.println("StudentManager initialized with optimized collections.");
     }
 
-    //**this method sets the  GradeManager reference
-    //public void setGradeManager(GradeManager gradeManager01) {
-        //this.gradeManager = gradeManager01;
-    //}
+    //basic operations
+    //Add a new student to the system.
 
+    public void addStudent(Student student) throws Exception {
+        long startTime = System.nanoTime(); // Start timing
 
-    // this method adds a student with O(1) average time complexity.
-    // It throws exceptions instead of returning boolean for cleaner error handling and uses ConcurrentHashMap.putIfAbsent() for atomic thread-safe operation.
-    public void addStudent(Student student) throws DuplicateStudentException, ValidationException {
-        AppLogger.enter("addStudent");
+        String studentId = student.getStudentId();
+        String email = student.getStudentEmail().toLowerCase();
 
-        try {
-            // Validate student data before any operation
-            validateStudentData(student);
-
-            String studentId = student.getStudentId();
-            String email = student.getStudentEmail();
-
-            // Thread-safe check for duplicate email using synchronized block
-            synchronized(emailRegistry) {
-                if (emailRegistry.contains(email)) {
-                    throw new DuplicateStudentException("Email '" + email + "' already registered.");
-                }
+        // Check if this email already registered
+        //synchronized is used to make sure only one thread can check at a time
+        synchronized(registeredEmails) {
+            if (registeredEmails.contains(email)) {
+                throw new Exception("Email '" + email + "' is already registered.");
             }
-
-            // Thread-safe atomic operation: put if absent
-            // Returns null if key was absent, returns existing value if key exists
-            Student existing = studentMap.putIfAbsent(studentId, student);
-
-            if (existing != null) {
-                // Student ID already exists - rollback email registration
-                synchronized(emailRegistry) {
-                    emailRegistry.remove(email);
-                }
-                throw new DuplicateStudentException(studentId);
-            }
-
-            // Update secondary collections
-            synchronized(sortedStudentMap) {
-                sortedStudentMap.put(studentId, student);
-            }
-
-            synchronized(emailRegistry) {
-                emailRegistry.add(email);
-            }
-
-            // Performance logging
-            lastAddStudentTime = System.nanoTime() - startTime;
-            AppLogger.info(String.format(
-                    "Student added in %d ns: ID=%s, Name=%s, Type=%s",
-                    lastAddStudentTime, studentId, student.getStudentName(), student.getStudentType()
-            ));
-
-        } finally {
-            AppLogger.exit("addStudent");
-        }
-    }
-
-
-    // This method validates all student data before adding  to system
-    // A separate method for Single Responsibility.
-    private void validateStudentData(Student student) throws ValidationException {
-        // Validate all student fields using InputValidator
-        InputValidator.validateName(student.getStudentName());
-        InputValidator.validateAge(student.getStudentAge());
-        InputValidator.validateEmail(student.getStudentEmail());
-        InputValidator.validatePhone(student.getStudentPhone());
-        InputValidator.validateStudentId(student.getStudentId());
-    }
-
-    // finds a student by their ID with O(1) average time complexity and throws an exception if a student is not found instead of null
-    // ConcurrentHashMap.get() is used;  thread-safe for reads.
-    public Student findStudent(String studentId) throws StudentNotFoundException {
-        long startTime = System.nanoTime(); // Start performance timer
-        AppLogger.enter("findStudent");
-
-        try {
-            // O(1) lookup in ConcurrentHashMap
-            Student student = studentMap.get(studentId);
-
-            if (student == null) {
-                AppLogger.warning("Student not found: ID=" + studentId);
-                throw new StudentNotFoundException(studentId);
-            }
-
-            // Performance logging
-            lastFindStudentTime = System.nanoTime() - startTime;
-            AppLogger.debug(String.format(
-                    "Student found in %d ns: ID=%s", lastFindStudentTime, studentId
-            ));
-
-            return student;
-
-        } finally {
-            AppLogger.exit("findStudent");
-        }
-    }
-
-    //internal method to find student by ID (returns null if not found)
-    //Separated from public method for clarity
-//    private Student findStudentById(String studentId) {
-//        // using Java Stream API for cleaner code (functional programming)
-//        return students.stream()
-//                .filter(student -> student.getStudentId().equals(studentId))
-//                .findFirst()
-//                .orElse(null); // Return null if not found
-//    }
-
-    // returns a copy of all students sorted by ID using TreeMap.
-    //  TreeMap maintains natural ordering of keys (student IDs) in the system
-    public List<Student> getAllStudentsSortedById() {
-        AppLogger.enter("getAllStudentsSortedById");
-
-        // TreeMap.values() returns values in key-sorted order
-        // Creating defensive copy to prevent external modification
-        List<Student> sortedStudents;
-        synchronized(sortedStudentMap) {
-            sortedStudents = new ArrayList<>(sortedStudentMap.values());
         }
 
-        AppLogger.debug("Returned " + sortedStudents.size() + " students sorted by ID.");
-        AppLogger.exit("getAllStudentsSortedById");
-
-        return sortedStudents;
-    }
-
-    /**
-     * Returns students sorted by name using Stream API and Comparator.
-     * Demonstrates functional programming with Streams.
-     */
-    public List<Student> getAllStudentsSortedByName() {
-        AppLogger.enter("getAllStudentsSortedByName");
-
-        // Using Java Stream API for functional, declarative programming
-        List<Student> sortedStudents = studentMap.values().stream()
-                .sorted(Comparator.comparing(Student::getStudentName)) // Comparator for name sorting
-                .collect(Collectors.toList()); // Terminal operation to collect results
-
-        AppLogger.debug("Returned " + sortedStudents.size() + " students sorted by name.");
-        AppLogger.exit("getAllStudentsSortedByName");
-
-        return sortedStudents;
-    }
-
-    /**
-     * Enhanced search with regex pattern matching.
-     * Searches both name and email using regular expressions.
-     */
-    public List<Student> searchStudentsWithRegex(String regexPattern, SearchField field)
-            throws ValidationException {
-
-        AppLogger.enter("searchStudentsWithRegex");
-
-        try {
-            // Validate regex pattern for safety
-            validateRegexPattern(regexPattern);
-
-            // Compile pattern once for efficiency
-            Pattern pattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
-            List<Student> results = new ArrayList<>();
-
-            // Choose search field
-            switch (field) {
-                case NAME:
-                    // Search in student names using regex
-                    for (Student student : studentMap.values()) {
-                        if (pattern.matcher(student.getStudentName()).find()) {
-                            results.add(student);
-                        }
-                    }
-                    break;
-
-                case EMAIL:
-                    // Search in student emails using regex
-                    // Example: ".*@university\\.edu$" finds all university emails
-                    for (Student student : studentMap.values()) {
-                        if (pattern.matcher(student.getStudentEmail()).find()) {
-                            results.add(student);
-                        }
-                    }
-                    break;
-
-                case ID:
-                    // Search in student IDs using regex
-                    for (Student student : studentMap.values()) {
-                        if (pattern.matcher(student.getStudentId()).find()) {
-                            results.add(student);
-                        }
-                    }
-                    break;
-            }
-
-            AppLogger.info(String.format(
-                    "Regex search '%s' on field %s found %d results",
-                    regexPattern, field, results.size()
-            ));
-
-            return results;
-
-        } catch (PatternSyntaxException e) {
-            throw new ValidationException("Invalid regex pattern: " + e.getMessage());
-        } finally {
-            AppLogger.exit("searchStudentsWithRegex");
+        // Check if this student ID is already taken
+        // putIfAbsent adds only if the ID doesn't exist yet
+        Student existing = studentsById.putIfAbsent(studentId, student);
+        if (existing != null) {
+            throw new Exception("Student ID '" + studentId + "' already exists.");
         }
+
+        // If both checks pass, add to all our collections
+        synchronized(studentsSortedById) {
+            studentsSortedById.put(studentId, student);
+        }
+
+        synchronized(registeredEmails) {
+            registeredEmails.add(email);
+        }
+
+        // Clear cache since we added a new student
+        clearCache();
+
+        // Update performance tracking
+        totalStudentsAdded++;
+        lastOperationTime = System.nanoTime() - startTime;
+
+        System.out.println("✓ Student added: " + student.getStudentName() +
+                " (ID: " + studentId + ")");
     }
 
-    /**
-     * Returns performance metrics for monitoring.
-     */
-    public Map<String, Long> getPerformanceMetrics() {
-        Map<String, Long> metrics = new HashMap<>();
-        metrics.put("lastAddStudentTime", lastAddStudentTime);
-        metrics.put("lastFindStudentTime", lastFindStudentTime);
-        metrics.put("studentCount", (long) studentMap.size());
-        metrics.put("emailRegistrySize", (long) emailRegistry.size());
-        return metrics;
+    //Find a student by their ID.
+    public Student findStudent(String studentId) throws Exception {
+        long startTime = System.nanoTime();
+
+        // Direct lookup in our HashMap
+        Student student = studentsById.get(studentId);
+
+        if (student == null) {
+            throw new Exception("Student with ID '" + studentId + "' not found.");
+        }
+
+        lastOperationTime = System.nanoTime() - startTime;
+        return student;
     }
 
-    /**
-     * Enum for search field types.
-     * Ensures type safety compared to using raw strings.
-     */
-    public enum SearchField {
-        NAME, EMAIL, ID
-    }
+    // view students with different sorting options using streams
+    public void viewAllStudents(String sortBy, int page, int itemsPerPage) {
+        System.out.println("\n=== ALL STUDENTS ===");
 
+        // Get all students as a list
+        List<Student> allStudents = new ArrayList<>(studentsById.values());
 
-
-    // this method displays all students in the system
-    public void viewAllStudents() {
-
-        AppLogger.enter("viewAllStudents");
-        System.out.println("=== ALL STUDENTS ===");
-        System.out.println("Total Students: " + students.size());
-        System.out.println();
-
-        if (students.isEmpty()) {
+        if (allStudents.isEmpty()) {
             System.out.println("No students registered yet.");
-            AppLogger.info("No students to display.");
             return;
         }
 
-        // using an enhanced for loop for cleaner syntax
-        for (Student student : students) {
-            student.displayStudentDetails();
+        // Sort based on user choice
+        List<Student> sortedStudents;
+        switch (sortBy.toLowerCase()) {
+            case "name":
+                // Sort by name using Stream API
+                sortedStudents = allStudents.stream()
+                        .sorted((s1, s2) -> s1.getStudentName().compareToIgnoreCase(s2.getStudentName()))
+                        .collect(Collectors.toList());
+                break;
+
+            case "id":
+                // Already sorted by ID in TreeMap
+                sortedStudents = new ArrayList<>(studentsSortedById.values());
+                break;
+
+            case "age":
+                // Sort by age (youngest first)
+                sortedStudents = allStudents.stream()
+                        .sorted((s1, s2) -> Integer.compare(s1.getStudentAge(), s2.getStudentAge()))
+                        .collect(Collectors.toList());
+                break;
+
+            default:
+                sortedStudents = allStudents;
+        }
+
+        // Calculate pagination
+        int totalPages = (int) Math.ceil((double) sortedStudents.size() / itemsPerPage);
+        page = Math.max(1, Math.min(page, totalPages)); // Make sure page is valid
+
+        int startIndex = (page - 1) * itemsPerPage;
+        int endIndex = Math.min(startIndex + itemsPerPage, sortedStudents.size());
+
+        // Display current page
+        System.out.println("Total: " + sortedStudents.size() + " students");
+        System.out.println("Page " + page + " of " + totalPages + " (Sorted by: " + sortBy + ")");
+        System.out.println("Showing students " + (startIndex + 1) + " to " + endIndex);
+        System.out.println();
+
+        // Show students on this page
+        for (int i = startIndex; i < endIndex; i++) {
+            Student student = sortedStudents.get(i);
+            System.out.println((i + 1) + ". " + student.getStudentName() +
+                    " (ID: " + student.getStudentId() +
+                    ", Type: " + student.getStudentType() +
+                    ", Age: " + student.getStudentAge() + ")");
+        }
+
+        // Show navigation
+        if (totalPages > 1) {
+            System.out.println("\nNavigation: ");
+            if (page > 1) System.out.print("[Previous Page] ");
+            if (page < totalPages) System.out.print("[Next Page]");
             System.out.println();
         }
-
-        AppLogger.info("Displayed " + students.size() + " students.");
-        AppLogger.exit("viewAllStudents");
     }
 
-    // this method calculates the average grade for the entire class
-    public double getAverageClassGrade() {
-        AppLogger.enter("getAverageClassGrade");
+    // search operations
+    public List<Student> searchByName(String searchText) {
+        totalSearches++;
 
-        if (students.isEmpty()) {
-            AppLogger.debug("No students, returning 0.0");
-            return 0.0;
-        }
-
-        double totalAverage = 0.0;
-        int studentsWithGrades = 0;
-
-        // calculating the average for each student
-        for (Student student : students) {
-            double studentAverage = student.calculateAverageGrade();
-
-            // only includes students who have grades
-            if (studentAverage > 0) {
-                totalAverage += studentAverage;
-                studentsWithGrades++;
+        // Check cache first
+        String cacheKey = "name:" + searchText.toLowerCase();
+        if (searchCache.containsKey(cacheKey)) {
+            SimpleCache cache = searchCache.get(cacheKey);
+            if (cache.isFresh()) {
+                System.out.println("✓ Using cached results for: " + searchText);
+                return new ArrayList<>(cache.results); // Return copy
             }
         }
 
-        double classAverage = studentsWithGrades > 0 ? totalAverage / studentsWithGrades : 0.0;
-        AppLogger.debug("Class average calculated: " + classAverage);
-        AppLogger.exit("getAverageClassGrade");
+        // If not in cache or cache expired, do the search
+        List<Student> results = studentsById.values().stream()
+                .filter(student ->
+                        student.getStudentName().toLowerCase().contains(searchText.toLowerCase()))
+                .collect(Collectors.toList());
 
-        return classAverage;
+        // Store in cache
+        searchCache.put(cacheKey, new SimpleCache(cacheKey, results));
+
+        System.out.println("Found " + results.size() + " students matching '" + searchText + "'");
+        return new ArrayList<>(results); // Return copy
     }
 
-    // returns the number of students in the system
-    public int getStudentCount() {
-        return students.size();
-    }
+    //Search using regular expressions (advanced pattern matching).
 
-    // this method searches for students by name (partial matching, case-insensitive)
-    public List<Student> searchByName(String partialName) {
-        AppLogger.enter("searchByName");
+    public List<Student> searchByPattern(String pattern, String field) throws Exception {
+        totalSearches++;
 
-        List<Student> results = new ArrayList<>();
-        String searchTerm = partialName.toLowerCase();
-
-        // filters students whose name contains the search term
-        for (Student student : students) {
-            if (student.getStudentName().toLowerCase().contains(searchTerm)) {
-                results.add(student);
+        // Check cache
+        String cacheKey = "pattern:" + pattern + ":" + field;
+        if (searchCache.containsKey(cacheKey)) {
+            SimpleCache cache = searchCache.get(cacheKey);
+            if (cache.isFresh()) {
+                System.out.println("✓ Using cached pattern results");
+                return new ArrayList<>(cache.results);
             }
         }
 
-        AppLogger.info("Name search for '" + partialName + "' found " + results.size() + " results.");
-        AppLogger.exit("searchByName");
+        // Validate pattern
+        if (pattern == null || pattern.trim().isEmpty()) {
+            throw new Exception("Search pattern cannot be empty");
+        }
 
-        return results;
+        try {
+            // Create pattern (case-insensitive)
+            Pattern regex = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+            List<Student> results = new ArrayList<>();
+
+            // Search based on field
+            for (Student student : studentsById.values()) {
+                String textToSearch;
+                switch (field.toLowerCase()) {
+                    case "name":
+                        textToSearch = student.getStudentName();
+                        break;
+                    case "email":
+                        textToSearch = student.getStudentEmail();
+                        break;
+                    case "id":
+                        textToSearch = student.getStudentId();
+                        break;
+                    default:
+                        throw new Exception("Invalid search field: " + field);
+                }
+
+                if (regex.matcher(textToSearch).find()) {
+                    results.add(student);
+                }
+            }
+
+            // Cache results
+            searchCache.put(cacheKey, new SimpleCache(cacheKey, results));
+
+            System.out.println("Pattern search found " + results.size() + " results");
+            return results;
+
+        } catch (PatternSyntaxException e) {
+            throw new Exception("Invalid search pattern: " + e.getMessage());
+        }
     }
 
-    // this method searches for students by type (Regular or Honors)
+    //Search by student type (Regular or Honors).
+
     public List<Student> searchByType(String type) {
-        AppLogger.enter("searchByType");
+        List<Student> results = studentsById.values().stream()
+                .filter(student -> student.getStudentType().equalsIgnoreCase(type))
+                .collect(Collectors.toList());
 
-        List<Student> results = new ArrayList<>();
-        String searchTerm = type.toLowerCase();
+        System.out.println("Found " + results.size() + " " + type + " students");
+        return results;
+    }
 
-        for (Student student : students) {
-            if (student.getStudentType().toLowerCase().contains(searchTerm)) {
-                results.add(student);
+    // batch operations
+
+    /**
+     * Add multiple students at once.
+     * Shows how to handle multiple operations.
+     */
+    public Map<String, String> addMultipleStudents(List<Student> studentsToAdd) {
+        Map<String, String> results = new HashMap<>();
+        int successCount = 0;
+
+        System.out.println("Adding " + studentsToAdd.size() + " students...");
+
+        for (Student student : studentsToAdd) {
+            try {
+                addStudent(student);
+                results.put(student.getStudentId(), "SUCCESS");
+                successCount++;
+            } catch (Exception e) {
+                results.put(student.getStudentId(), "FAILED: " + e.getMessage());
             }
         }
 
-        AppLogger.info("Type search for ' " + type + " ' found" + results.size() + " results. ");
-        AppLogger.exit("searchByType");
+        System.out.println("Batch add complete: " + successCount + " succeeded, " +
+                (studentsToAdd.size() - successCount) + " failed");
 
         return results;
-
     }
 
-    // this method searches students by grade range
-    // for instance minGrade=80, maxGrade=90 finds students with 80-90% average
-    public List<Student> searchByGradeRange(double minGrade, double maxGrade) {
-        AppLogger.enter("searchByGradeRange");
+    // helper methods
 
-        List<Student> results = new ArrayList<>();
-        // Validate input range
-        if (minGrade < 0 || maxGrade > 100 || minGrade > maxGrade) {
-            AppLogger.warning("Invalid grade range: " + minGrade + " - " + maxGrade);
-            return results; // return empty list
-        }
-
-        // Filter students by average grade
-        for (Student student : students) {
-            double average = student.calculateAverageGrade();
-
-            // Only include students who actually have grades
-            if (average > 0 && average >= minGrade && average <= maxGrade) {
-                results.add(student);
-            }
-        }
-
-        AppLogger.info(
-                "Grade range search (" + minGrade + "–" + maxGrade +
-                        ") found " + results.size() + " students."
-        );
-
-        AppLogger.exit("searchStudentsByGradeRange");
-        return results;
-
+    /**
+     * Clear the search cache.
+     */
+    private void clearCache() {
+        searchCache.clear();
+        System.out.println("Search cache cleared");
     }
 
+    /**
+     * Get basic statistics about our students.
+     */
+    public void showStatistics() {
+        System.out.println("\n=== SYSTEM STATISTICS ===");
+        System.out.println("Total Students: " + studentsById.size());
+        System.out.println("Regular Students: " +
+                studentsById.values().stream()
+                        .filter(s -> s.getStudentType().equals("Regular"))
+                        .count());
+        System.out.println("Honors Students: " +
+                studentsById.values().stream()
+                        .filter(s -> s.getStudentType().equals("Honors"))
+                        .count());
+        System.out.println("Total Added: " + totalStudentsAdded);
+        System.out.println("Total Searches: " + totalSearches);
+        System.out.println("Cache Size: " + searchCache.size());
 
-    // this method displays a summary report of all students
-    public void displayStudentSummary() {
-        System.out.println("=== STUDENT SUMMARY REPORT ===");
-        System.out.println("Total Students: " + students.size());
-
-        int regularCount = 0;
-        int honorsCount = 0;
-        int passingCount = 0;
-
-        // Count different types of students
-        for (Student student : students) {
-            if (student.getStudentType().equals("Regular")) {
-                regularCount++;
-            } else {
-                honorsCount++;
-            }
-
-            if (student.isPassing()) {
-                passingCount++;
-            }
+        if (lastOperationTime > 0) {
+            System.out.printf("Last operation took: %.2f ms\n", lastOperationTime / 1_000_000.0);
         }
-
-        System.out.println("Regular Students: " + regularCount);
-        System.out.println("Honors Students: " + honorsCount);
-        System.out.println("Passing Students: " + passingCount);
-        System.out.printf("Class Average: %.2f%%\n", getAverageClassGrade());
-        System.out.println("===============================");
-
-        AppLogger.info("Displayed student summary: " + students.size() +
-                " students, " + passingCount + " passing.");
     }
 
+    //Get all students
+
+    public List<Student> getAllStudents() {
+        return new ArrayList<>(studentsById.values());
+    }
+
+    //Get student count.
+    public int getStudentCount() {
+        return studentsById.size();
+    }
+
+    //This method displays all students
+
+    public void viewAllStudents() {
+        viewAllStudents("id", 1, 20); // Default: sorted by ID, first page, 20 items
+    }
+
+    /**
+     * Remove expired cache entries (basic cleanup).
+     */
+    public void cleanupCache() {
+        int beforeSize = searchCache.size();
+        searchCache.entrySet().removeIf(entry -> !entry.getValue().isFresh());
+        int removed = beforeSize - searchCache.size();
+
+        if (removed > 0) {
+            System.out.println("Cleaned up " + removed + " expired cache entries");
+        }
+    }
 }
-
-
-

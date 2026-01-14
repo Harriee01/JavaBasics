@@ -1,104 +1,180 @@
-import java.util.ArrayList;// used to import Java's ArrayList class to store lists of grades
+import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class Student implements Gradable, Exportable, Searchable, Calculable { // Student class is abstract because it cannot be instantiated and is used as the parent class for all student types
-    //all the fields are private so that they can be modified and accessed only within this abstract class
-    // it also implements the Gradable interface and provides (a must) for the methods stated in the interface
-    // now it also implements multiple interfaces,that is exportable, searchable and calculable
+//Implements Serializable for binary export, follows SOLID principles and designed for thread-safe operations.
+public abstract class Student implements Serializable, Gradable {
+    // Serializable marker for binary export
+    private static final long serialVersionUID = 1L;
 
-    private String studentId; //unique student ID
-    private String studentName; // Student's full name
-    private String studentEmail;// Student's email address
-    private String studentPhone;//Student's phone number
-    private int studentAge; // Student's age
-    private String studentStatus; // Student's current status be it active or inactive
-    private static int studentCounter = 1; //  static counter to generate the unique student IDs
+    // AtomicInteger is used for thread-safe ID generation
+    private static final AtomicInteger studentCounter = new AtomicInteger(1000);
 
-    //running totals for average calculation
-    // private double totalGrades = 0.0;
-    //private int gradeCount = 0;
-    // protected ArrayList<Double> grades = new ArrayList<>(); // this list is for storing the grades of a student
+    // Final fields for immutability (Thread safety)
+    private final String studentId;           // Immutable unique identifier
+    private final String studentType;         // Immutable student type
 
-    //referencing GradeManager which is needed to calculate averages; it will be set from the main class
-    protected GradeManager gradeManager;
+    // Mutable fields with proper encapsulation
+    private String studentName;
+    private String studentEmail;
+    private String studentPhone;
+    private int studentAge;
+    private String studentStatus;
 
+    // No GradeManager dependency (Dependency Inversion Principle)
+    // No search logic in entity (Single Responsibility Principle)
+    // No export logic in entity (Interface Segregation Principle)
 
-    // Constructor to initialize a new Student object
-    public Student(String studentName, String studentEmail, String studentPhone, int studentAge) {
-        studentCounter++; //increments counter for every new student
-        this.studentId = String.format("STU" + studentCounter);
+    //Constructor for Student which is initialized with thread-safe ID generation.
+    protected Student(String studentName, String studentEmail,
+                      String studentPhone, int studentAge, String studentType) {
+        // Thread-safe ID generation using AtomicInteger
+        this.studentId = String.format("STU%04d", studentCounter.incrementAndGet());
+        this.studentType = studentType; // Set by subclass constructor
+
+        // Initialize mutable fields
         this.studentName = studentName;
         this.studentEmail = studentEmail;
         this.studentPhone = studentPhone;
         this.studentAge = studentAge;
-        this.studentStatus = "ACTIVE"; // the default status for every new student
+        this.studentStatus = "ACTIVE"; // Default status
     }
 
-    //Getter methods to read private fields
-    public String getStudentId() {return studentId;}
-    public String getStudentName() {return studentName;}
-    public String getStudentEmail() {return studentEmail;}
-    public String getStudentPhone() {return studentPhone;}
-    public int getStudentAge() {return studentAge;}
-    public String getStudentStatus() {return studentStatus;}
+    // Getter methods
 
-    //Setter methods to allow other classes modify private fields
-    public void setStudentName(String studentName){this.studentName = studentName;}
-    public void setStudentEmail(String studentEmail){this.studentEmail = studentEmail;}
-    public void setStudentPhone(String studentPhone){this.studentPhone = studentPhone;}
-    public void setStudentAge(int studentAge){this.studentAge = studentAge;}
-    public void setStudentStatus(String studentStatus){this.studentStatus = studentStatus;}
+    //Returns the student's unique ID and used as key in HashMap for O(1) lookup
+    public String getStudentId() {
+        return studentId;
+    }
 
-    //this method sets the GradeManager reference
-    public void setGradeManager(GradeManager gradesManager){this.gradeManager = gradesManager;}
+    //Returns the student type ("Regular" or "Honors")
+    public String getStudentType() {
+        return studentType;
+    }
 
-    //implementing the Gradable interface method, validateGrade to validate if a grade is between 0 and 100
+    //Returns the student's name.
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    //Returns the student's email address.
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    //Returns the student's phone number.
+    public String getStudentPhone() {
+        return studentPhone;
+    }
+
+    //Returns the student's age.
+    public int getStudentAge() {
+        return studentAge;
+    }
+
+    //Returns the student's current status.
+    public String getStudentStatus() {
+        return studentStatus;
+    }
+
+
+
+    //Updates the student's name.Validation is performed by StudentManager
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    //Updates the student's email.Email format validation  will be performed by StudentManager using regex.
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
+    }
+
+    //Updates the student's phone number.Phone format validation will be performed by StudentManager using regex.
+    public void setStudentPhone(String studentPhone) {
+        this.studentPhone = studentPhone;
+    }
+
+    //Updates the student's age.Age validation should be performed by StudentManager.
+    public void setStudentAge(int studentAge) {
+        this.studentAge = studentAge;
+    }
+
+    //Updates the student's status.
+
+    public void setStudentStatus(String studentStatus) {
+        this.studentStatus = studentStatus;
+    }
+    public String exportToText() {
+        return String.format(
+                "Student ID: %s\nName: %s\nEmail: %s\nPhone: %s\nAge: %d\nType: %s\nStatus: %s",
+                studentId, studentName, studentEmail, studentPhone,
+                studentAge, getStudentType(), studentStatus
+        );
+    }
+
+
+
+    //Gradable interface implementation
+    //Validates if a grade is within acceptable range (0-100).
     @Override
     public boolean validateGrade(double grade) {
-        return grade >= 0 && grade <= 100; //returns true if valid, false if not
+        return grade >= 0 && grade <= 100;
     }
 
-    //implementing the Gradable interface method, recordGrade to record a grade(used as a placeholder for now)
+    //Records a grade (placeholder - actual recording  is done by GradeManager) .Returns true if grade is valid.
     @Override
-    public boolean recordGrade(double grade){
-        //checking if grade is valid before recording
-        if (validateGrade(grade)) {
-            return true; // grade is valid and can be recorded
-        }
-        return false;
+    public boolean recordGrade(double grade) {
+        return validateGrade(grade);
     }
-    // implementing the Searchable interface - this allows searching students
+
+
+    // Abstract methods that will be implemented by subclasses
+
+    //Returns the minimum passing grade for this student type
+    public abstract double getPassingGrade();
+
+    //Displays student details in a formatted way.
+    public abstract void displayStudentDetails();
+
+    //Checks if the student is passing based on their average grade.
+    public abstract boolean isPassing(double currentAverage);
+
+    // Equals and hashcode for collection optimization
+
+    //Students are equal if they have the same studentId important for HashMap/HashSet operations
     @Override
-    public boolean matchesId(String id) {
-        // exact match for ID (case-insensitive)
-        return this.studentId.equalsIgnoreCase(id);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Student student = (Student) obj;
+        return studentId.equals(student.studentId);
     }
 
+    //HashCode based on studentId for efficient HashMap operations, consistent with equals() method.
     @Override
-    public boolean matchesName(String name) {
-        // partial match for name (case-insensitive)
-        //for instance, when searching "john" matches "John Smith" or "Alice Johnson"
-        return this.studentName.toLowerCase().contains(name.toLowerCase());
+    public int hashCode() {
+        return studentId.hashCode();
     }
 
+    // to string method for debugging
+
+    //Returns string representation of student for debugging.
     @Override
-    public boolean matchesType(String type) {
-        //this checks if student type matches search criteria
-        return this.getStudentType().equalsIgnoreCase(type);
+    public String toString() {
+        return String.format("Student{id=%s, name='%s', type=%s, status=%s}",
+                studentId, studentName, studentType, studentStatus);
     }
 
-    // implementing Calculable interface
-    @Override
-    public double calculateAverage() {
-        if (gradeManager == null) return 0.0;
-        return gradeManager.calculateOverallAverage(studentId);
+    // static methods for ID management
+
+    //Returns the next available student ID without incrementing counter for previewing what the next ID will be
+    public static String getNextStudentId() {
+        return String.format("STU%04d", studentCounter.get() + 1);
     }
 
-
-    //Abstract methods that must be implemented in subclasses
-    public abstract double getPassingGrade();// returns the minimum passing grade
-    public abstract String getStudentType();//returns the type of student, whether regular or honors
-    public abstract void displayStudentDetails();// shows the student information
-    public abstract double calculateAverageGrade();// calculates the average of all the grades
-    public abstract boolean isPassing();// checks if the student is passing
-
+    //Resets the student counter (for testing purposes only).
+     //Package-private to prevent misuse.
+    static void resetCounterForTesting() {
+        studentCounter.set(1000);
+    }
 }

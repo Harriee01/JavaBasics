@@ -3,9 +3,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * GradeManager for Fold 3 - Manages all grades in the system.
+ * GradeManager - Manages all grades in the system.
  * Uses optimized collections for better performance.
- * Beginner-friendly version with clear explanations.
  */
 public class GradeManager {
 

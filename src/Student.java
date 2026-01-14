@@ -78,6 +78,7 @@ public abstract class Student implements Serializable, Gradable {
     }
 
 
+
     //Updates the student's name.Validation is performed by StudentManager
     public void setStudentName(String studentName) {
         this.studentName = studentName;
@@ -102,6 +103,13 @@ public abstract class Student implements Serializable, Gradable {
 
     public void setStudentStatus(String studentStatus) {
         this.studentStatus = studentStatus;
+    }
+    public String exportToText() {
+        return String.format(
+                "Student ID: %s\nName: %s\nEmail: %s\nPhone: %s\nAge: %d\nType: %s\nStatus: %s",
+                studentId, studentName, studentEmail, studentPhone,
+                studentAge, getStudentType(), studentStatus
+        );
     }
 
 

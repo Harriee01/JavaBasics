@@ -354,6 +354,40 @@ public class GradeManager {
         System.out.printf("GPA (4.0 scale): %.2f\n", gpa);
     }
 
+    public void viewGradesByStudent(String studentId) throws Exception {
+        List<Grade> grades = getGradesForStudent(studentId);
+
+        System.out.println("\n=== GRADES FOR STUDENT: " + studentId + " ===");
+
+        if (grades.isEmpty()) {
+            System.out.println("No grades found.");
+            return;
+        }
+
+        // Group by subject
+        Map<String, List<Grade>> bySubject = new HashMap<>();
+        for (Grade grade : grades) {
+            String subjectName = grade.getSubject().getSubjectName();
+            bySubject.computeIfAbsent(subjectName, k -> new ArrayList<>()).add(grade);
+        }
+
+        // Display
+        for (Map.Entry<String, List<Grade>> entry : bySubject.entrySet()) {
+            System.out.println("\nSubject: " + entry.getKey());
+            for (Grade grade : entry.getValue()) {
+                System.out.printf("  - %.2f%% (%s) - %s\n",
+                        grade.getGradeValue(),
+                        grade.getLetterGrade(),
+                        grade.getDate());
+            }
+        }
+
+        // Show statistics
+        double average = calculateStudentAverage(studentId);
+        System.out.printf("\nAverage: %.2f%% (GPA: %.2f)\n",
+                average, calculateGPA(average));
+    }
+
     // ========== HELPER METHODS ==========
 
     /**

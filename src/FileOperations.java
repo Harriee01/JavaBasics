@@ -3,7 +3,7 @@ import java.nio.file.*;
 import java.util.List;
 
 /**
- * Simple file operations for Fold 3.
+ * Simple file operations
  * Demonstrates basic NIO.2 usage.
  */
 public class FileOperations {

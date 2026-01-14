@@ -373,4 +373,64 @@ public class StudentManager {
             System.out.println("Cleaned up " + removed + " expired cache entries");
         }
     }
+
+    /**
+     * Search students using regular expressions.
+     * This implements Fold 3's regex-based search requirement.
+     */
+    public List<Student> searchStudentsWithRegex(String regexPattern, SearchField field)
+            throws Exception {
+
+        if (regexPattern == null || regexPattern.trim().isEmpty()) {
+            throw new Exception("Search pattern cannot be empty");
+        }
+
+        if (regexPattern.length() > 100) {
+            throw new Exception("Pattern too long (max 100 characters)");
+        }
+
+        try {
+            Pattern pattern = Pattern.compile(regexPattern, Pattern.CASE_INSENSITIVE);
+            List<Student> results = new ArrayList<>();
+
+            // FIXED: Use studentsById.values()
+            for (Student student : studentsById.values()) {
+                String textToSearch;
+
+                switch (field) {
+                    case NAME: textToSearch = student.getStudentName(); break;
+                    case EMAIL: textToSearch = student.getStudentEmail(); break;
+                    case ID: textToSearch = student.getStudentId(); break;
+                    case TYPE: textToSearch = student.getStudentType(); break;
+                    case STATUS: textToSearch = student.getStudentStatus(); break;
+                    default: throw new Exception("Invalid search field");
+                }
+
+                if (pattern.matcher(textToSearch).find()) {
+                    results.add(student);
+                }
+            }
+
+            System.out.println("Regex search found " + results.size() + " results");
+            return results;
+
+        } catch (PatternSyntaxException e) {
+            throw new Exception("Invalid regex pattern: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Options for sorting students.
+     */
+    public enum SortOption {
+        ID, NAME, TYPE, AGE, STATUS, NONE
+    }
+
+    /**
+     * Fields for regex search.
+     */
+    public enum SearchField {
+        NAME, EMAIL, ID, TYPE, STATUS
+    }
+
 }

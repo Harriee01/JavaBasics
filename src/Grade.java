@@ -12,13 +12,12 @@ public class Grade {
     private double gradeValue;
 
     //this constructor creates a new Grade object
-    public Grade(String studentId, Subject subject, double grade, double gradeValue) {
+    public Grade(String studentId, Subject subject, double gradeValue) {
         gradeCounter++;// increment the counter for each new grade
         this.gradeId = String.format("GRD%03d", gradeCounter);
 
         this.studentId = studentId;
         this.subject = subject;
-        this.grade = grade;
         this.date = LocalDate.now();
         this.gradeValue = gradeValue;
 

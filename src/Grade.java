@@ -9,9 +9,10 @@ public class Grade {
     private Subject subject; // the subject the grade is for
     private double grade;// the actual grade from 0-100
     private LocalDate date; // the date the grade was recorded
+    private double gradeValue;
 
     //this constructor creates a new Grade object
-    public Grade(String studentId, Subject subject, double grade) {
+    public Grade(String studentId, Subject subject, double grade, double gradeValue) {
         gradeCounter++;// increment the counter for each new grade
         this.gradeId = String.format("GRD%03d", gradeCounter);
 
@@ -19,6 +20,7 @@ public class Grade {
         this.subject = subject;
         this.grade = grade;
         this.date = LocalDate.now();
+        this.gradeValue = gradeValue;
 
     }
 
@@ -28,6 +30,7 @@ public class Grade {
     public Subject getSubject() { return subject; }
     public double getGrade() { return grade; }
     public LocalDate getDate() { return date; }
+    public double getGradeValue() {return gradeValue;}
 
     //this method displays all grade information
     public void displayGradeDetails() {
@@ -48,4 +51,6 @@ public class Grade {
         else if (grade >= 50) return "D";
         else return "F";
     }
+
+
 }
